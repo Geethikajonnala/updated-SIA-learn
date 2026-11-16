@@ -41,6 +41,49 @@ const circuitTopics = [
   { title: 'Circuit Execution & Simulation', intro: 'Compare ideal simulation, shot sampling, and real quantum hardware.' },
   { title: 'Quantum Circuit Examples', intro: 'Bring the ideas together in short, complete circuits.' }
 ];
+const circuitStudyTopics = [
+  {
+    title: 'Measurement and Feed-Forward',
+    intro: 'Learn how measurement results become classical information that can control later operations.',
+    sections: [
+      ['Measurement produces classical outcomes', 'For |ψ⟩ = α|0⟩ + β|1⟩, a computational-basis measurement returns 0 with probability |α|² or 1 with probability |β|². The result is a classical bit; after measurement, later steps use that recorded value rather than the unmeasured superposition.'],
+      ['Use a result to control a later step', 'Feed-forward means using a measurement result to choose a later operation. If the measured bit is c, a classical condition can select one operation when c = 0 and another when c = 1. This connects quantum measurement with ordinary conditional control.'],
+      ['Read the circuit in stages', 'First prepare and measure a quantum register. Next record the outcome in a classical register. Finally use that record to decide which later operation or correction to apply. The order matters: the classical decision can only use a result that has already been measured.']
+    ]
+  },
+  {
+    title: 'Analysing Quantum States',
+    intro: 'Connect state amplitudes, probabilities, and measurement data when inspecting a quantum computation.',
+    sections: [
+      ['A state is a vector of amplitudes', 'An n-qubit pure state has 2ⁿ complex amplitudes, one for each computational-basis bit string: |ψ⟩ = Σₓ αₓ|x⟩. The state is normalized when Σₓ|αₓ|² = 1.'],
+      ['Convert amplitudes into probabilities', 'The Born rule gives P(x) = |αₓ|². Probabilities describe the ideal distribution; repeated measurements produce counts that estimate it and can vary from run to run.'],
+      ['State inspection and sampling answer different questions', 'A state vector retains amplitude and phase information, while computational-basis probabilities retain only squared magnitudes. Two states can therefore have the same immediate measurement probabilities but respond differently to later gates.']
+    ]
+  },
+  {
+    title: 'Observables and Hamiltonians',
+    intro: 'Understand how measurable quantities are represented by operators and how Hamiltonians describe energy and evolution.',
+    sections: [
+      ['An observable represents a measurement', 'A quantum observable is represented by a Hermitian operator O. Its eigenvalues oₖ are possible measurement results, with eigenstates satisfying O|oₖ⟩ = oₖ|oₖ⟩.'],
+      ['Expectation values summarize outcomes', 'For a state |ψ⟩, the expected value is ⟨O⟩ = ⟨ψ|O|ψ⟩. It is the probability-weighted average of many measurements, not necessarily the result of any single measurement.'],
+      ['Hamiltonians describe energy and evolution', 'A Hamiltonian H represents the energy of a system. With ℏ = 1, the Schrödinger equation is i d|ψ⟩/dt = H|ψ⟩; for a time-independent H, evolution is |ψ(t)⟩ = e^(−iHt)|ψ(0)⟩.']
+    ]
+  },
+  {
+    title: 'Noise and Error Mitigation',
+    intro: 'Distinguish ideal circuit predictions from noisy results and learn what error mitigation can—and cannot—do.',
+    sections: [
+      ['Where noise enters a circuit', 'Physical devices have imperfect gates, finite coherence, and readout errors. These effects can change measured counts from the ideal distribution and may accumulate as a circuit grows deeper.'],
+      ['Mitigation estimates a less-biased result', 'Error mitigation uses calibration or repeated measurements under controlled variations to estimate the result that an ideal circuit would produce. It can reduce some biases, but it does not make noisy hardware error-free.'],
+      ['Check the limits of a corrected estimate', 'Compare mitigated results with the unmitigated data and an appropriate ideal or classical reference when available. Report the method and uncertainty: mitigation is an estimate, not a substitute for quantum error correction or evidence that all errors were removed.']
+    ]
+  }
+];
+const circuitsAndGatesTopics = [
+  { title: 'Basic Circuits', route: { group: 'circuit', index: 0 } },
+  { title: 'The Gate Set', route: { group: 'gate', page: 'introduction' } },
+  ...circuitStudyTopics.map((topic, index) => ({ title: topic.title, route: { group: 'circuit-study', index } }))
+];
 const algorithmTopics = [
   { title: 'Deutsch Algorithm', intro: 'Use one query to determine whether a one-bit function is constant or balanced.', goal: 'The Deutsch algorithm asks whether f(0) and f(1) are the same or different. Classically, the answer requires checking both inputs; with a quantum oracle, the algorithm can reveal the property with one query.', steps: ['Prepare a query qubit in |0⟩ and an auxiliary qubit in |1⟩.', 'Apply H gates so the query explores both inputs while the auxiliary qubit prepares phase kickback.', 'Apply the oracle, then H to the query qubit and measure it.'], result: 'A measurement of 0 indicates a constant function; 1 indicates a balanced function. The lesson is not that every problem needs fewer queries, but that phase can encode useful global information.' },
   { title: 'Deutsch-Jozsa Algorithm', intro: 'Generalize Deutsch’s question to distinguish constant and balanced functions across many inputs.', goal: 'Deutsch-Jozsa considers a promised function on n-bit inputs: it is either constant for every input or balanced, returning 0 for half the inputs and 1 for the other half.', steps: ['Prepare n input qubits in |0⟩ and one auxiliary qubit in |1⟩.', 'Use Hadamard gates, call the oracle once, and apply Hadamards to the input register.', 'Measure the input register and look for the all-zero result.'], result: 'All zeros means the function is constant; any nonzero bit string means it is balanced, under the promise. It is a clean example of using interference to learn a property without reading every function value.' },
@@ -119,7 +162,7 @@ const gateGroups = [
 ];
 const gatePageOrder = ['introduction', 'single', 'x', 'y', 'z', 'h', 's', 't', 'rotations', 'rx', 'ry', 'rz', 'multi', 'cnot', 'cz', 'swap', 'universal', 'circuits'];
 
-const state = { activeChapter: 0, activeTopic: 0, activeMathTopic: 0, activeGatePage: 'introduction', activeCircuitTopic: 0, activeAlgorithmTopic: 0, activeSimulationTopic: 0, activeFrameworkTopic: 0, activeApplicationTopic: 0, fundamentalsExpanded: false, mathematicsExpanded: false, gatesExpanded: false, circuitsExpanded: false, algorithmsExpanded: false, simulationExpanded: false, frameworksExpanded: false, applicationsExpanded: false, singleGatesExpanded: false, rotationGatesExpanded: false, multiGatesExpanded: false, completed: JSON.parse(localStorage.getItem('learn-quantum-progress') || '[]') };
+const state = { activeChapter: 0, activeTopic: 0, activeMathTopic: 0, activeGatePage: 'introduction', activeCircuitTopic: 0, activeCircuitStudyTopic: -1, activeAlgorithmTopic: 0, activeSimulationTopic: 0, activeFrameworkTopic: 0, activeApplicationTopic: 0, fundamentalsExpanded: false, mathematicsExpanded: false, gatesExpanded: false, circuitsExpanded: false, algorithmsExpanded: false, simulationExpanded: false, frameworksExpanded: false, applicationsExpanded: false, singleGatesExpanded: false, rotationGatesExpanded: false, multiGatesExpanded: false, completed: JSON.parse(localStorage.getItem('learn-quantum-progress') || '[]') };
 state.expandedSection = 'basics';
 state.lastRenderedSection = null;
 const navigationSections = [
@@ -138,14 +181,7 @@ const navigationSections = [
   {
     id: 'circuits-and-gates',
     title: 'Quantum Circuits and Gates',
-    topics: [
-      { title: 'Basic Circuits', route: { group: 'circuit', index: 0 } },
-      { title: 'The Gate Set', route: { group: 'gate', page: 'introduction' } },
-      { title: 'Measurement and Feed-Forward' },
-      { title: 'Analysing Quantum States' },
-      { title: 'Observables and Hamiltonians' },
-      { title: 'Noise and Error Mitigation' }
-    ]
+    topics: circuitsAndGatesTopics
   },
   {
     id: 'sia-script-programming',
@@ -228,7 +264,8 @@ function renderSidebar() {
     if (route.group === 'fundamentals') return state.activeChapter === 0 && state.activeTopic === route.index;
     if (route.group === 'math') return state.activeChapter === 1 && state.activeMathTopic === route.index;
     if (route.group === 'gate') return state.activeChapter === 2 && state.activeGatePage === route.page;
-    if (route.group === 'circuit') return state.activeChapter === 3 && state.activeCircuitTopic === route.index;
+    if (route.group === 'circuit') return state.activeChapter === 3 && state.activeCircuitStudyTopic < 0 && state.activeCircuitTopic === route.index;
+    if (route.group === 'circuit-study') return state.activeChapter === 3 && state.activeCircuitStudyTopic === route.index;
     if (route.group === 'algorithm') return state.activeChapter === 4 && state.activeAlgorithmTopic === route.index;
     if (route.group === 'simulation') return state.activeChapter === 5 && state.activeSimulationTopic === route.index;
     if (route.group === 'framework') return state.activeChapter === 6 && state.activeFrameworkTopic === route.index;
@@ -257,6 +294,12 @@ function renderSidebar() {
   }).join('');
 
   chapterList.querySelectorAll('[data-section]').forEach((button) => button.addEventListener('click', () => {
+    const sectionId = button.dataset.section;
+    if (sectionId === 'mathematical-foundations' && (state.activeChapter !== 1 || state.activeMathTopic !== 0)) {
+      state.expandedSection = sectionId;
+      loadMathTopic(0);
+      return;
+    }
     state.expandedSection = state.expandedSection === button.dataset.section ? null : button.dataset.section;
     renderSidebar();
   }));
@@ -268,6 +311,7 @@ function renderSidebar() {
       case 'math': loadMathTopic(index); break;
       case 'gate': loadGatePage(button.dataset.navPage); break;
       case 'circuit': loadCircuitTopic(index); break;
+      case 'circuit-study': loadCircuitStudyTopic(index); break;
       case 'algorithm': loadAlgorithmTopic(index); break;
       case 'simulation': loadSimulationTopic(index); break;
       case 'framework': loadFrameworkTopic(index); break;
@@ -555,7 +599,7 @@ function measurementLessonTemplate() {
   </section>`;
 }
 
-function complexNumbersLessonTemplate() {
+function complexNumbersLessonTemplate(topic) {
   const examples = [
     {
       title: 'A Complex Number, Shown Exactly',
@@ -577,7 +621,7 @@ function complexNumbersLessonTemplate() {
       title: 'Multiplying by i Turns a Number by a Quarter Turn',
       concept: 'Both factors and the product; the angles add and the lengths multiply.',
       code: 'from sia import hdqs\n(hdqs.cnum(1, 1) * 1j).draw(dpi=80);',
-      output: '&lt;Figure size 640x600 with 1 Axes&gt;',
+      output: '<Figure size 640x600 with 1 Axes>',
       image: 'images/complex-number-multiply-by-i.png',
       imageAlt: 'Original Sia Script complex-plane output: z₁ = 1 + i is rotated by multiplication by i into z₁ · z₂ = −1 + i; z₂ = i. The arrows show the original vector, the quarter-turn factor, and the product.',
       imageCaption: 'Original Sia Script execution figure from Volume 1, page 4.',
@@ -588,7 +632,7 @@ function complexNumbersLessonTemplate() {
       title: 'Addition Is Adding Arrows',
       concept: 'A complex number can be drawn as an arrow in the complex plane. Adding two complex numbers combines their real parts and their imaginary parts.',
       code: 'from sia import hdqs\n(hdqs.cnum(1, 1) + hdqs.cnum(2, -1)).draw(dpi=80);',
-      output: '&lt;Figure size 640x600 with 1 Axes&gt;',
+      output: '<Figure size 640x600 with 1 Axes>',
       image: 'images/complex-vector-addition.png',
       imageAlt: 'Original Sia Script complex-plane output: arrows for z₁ = 1 + i and z₂ = 2 − i combine to give z₁ + z₂ = 3 along the real axis.',
       imageCaption: 'Original Sia Script execution figure from Volume 1, page 5.',
@@ -607,8 +651,18 @@ function complexNumbersLessonTemplate() {
 
   return `<section class="qubit-lesson math-lesson complex-numbers-lesson">
     <section class="qubit-section complex-concept">
-      <h2>What Are Complex Numbers?</h2>
-      <p>A complex number combines a real part with an imaginary part. The imaginary unit <strong>i</strong> is defined by <strong>i² = −1</strong>; this lets us work with square roots of negative numbers.</p>
+      <h2>Introduction</h2>
+      <p>${topic.intro}</p>
+      <h2>Learning Objectives</h2>
+      <ul>
+        <li>Write a complex number in Cartesian and polar form.</li>
+        <li>Calculate its conjugate, magnitude, and argument.</li>
+        <li>Explain how magnitude and relative phase affect quantum amplitudes.</li>
+      </ul>
+      <h2>Core Concepts</h2>
+      <p>A complex number is <strong>z = a + bi</strong>, where <strong>a</strong> and <strong>b</strong> are real and <strong>i² = −1</strong>. The real and imaginary parts are coordinates in a plane, not two different kinds of number.</p>
+      <h2>Mathematical Foundations</h2>
+      <p>Complex arithmetic extends ordinary arithmetic so that quantum amplitudes can carry both magnitude and phase. The conjugate reverses the sign of the imaginary part, and the magnitude measures distance from the origin.</p>
       <div class="complex-equations" aria-label="Complex number definitions">
         <div class="complex-equation"><math display="block" aria-label="z equals a plus b i"><mi>z</mi><mo>=</mo><mi>a</mi><mo>+</mo><mi>b</mi><mi>i</mi></math><p><strong>z</strong> is the complex number, <strong>a</strong> is its real part, <strong>b</strong> is its real-valued imaginary coefficient, and <strong>i</strong> is the imaginary unit.</p></div>
         <div class="complex-equation"><math display="block" aria-label="i squared equals negative one"><msup><mi>i</mi><mn>2</mn></msup><mo>=</mo><mo>−</mo><mn>1</mn></math><p>Squaring the imaginary unit gives negative one.</p></div>
@@ -618,22 +672,36 @@ function complexNumbersLessonTemplate() {
       </div>
       <h3>Why Complex Numbers Matter in Quantum Computing</h3>
       <p>Quantum states use complex numbers as probability amplitudes. An amplitude’s squared magnitude determines its probability; its phase carries additional information. When alternatives combine, their <strong>relative phases</strong> can make amplitudes reinforce or cancel through interference. The magnitude alone does not capture that phase effect.</p>
-      <div class="qubit-equation">P = |amplitude|²</div>
+      <h2>Important Formulas</h2>
+      <div class="qubit-equation">z₁ + z₂ = (a₁ + a₂) + i(b₁ + b₂)</div>
+      <div class="qubit-equation">(a + bi)(c + di) = (ac − bd) + i(ad + bc)</div>
+      <div class="qubit-equation">|z|² = z z̄ = a² + b² &nbsp;&nbsp; P = |amplitude|²</div>
       <p>Euler’s relationship <strong>e<sup>iθ</sup> = cos(θ) + i sin(θ)</strong> connects phase to a rotation in the complex plane.</p>
+    </section>
+    <section class="qubit-section">
+      <h2>Step-by-Step Examples</h2>
+      <p>For <strong>z = 1 + i</strong>, the magnitude is <strong>|z| = √(1² + 1²) = √2</strong> and the argument is <strong>θ = arctan(1/1) = π/4</strong>.</p>
+      <p>Squaring gives <strong>(1 + i)² = 1 + 2i + i² = 2i</strong>. The magnitude is squared and the angle doubles: <strong>(√2)²e<sup>iπ/2</sup> = 2i</strong>.</p>
+      <p>As a second calculation, <strong>(1 + i) + (2 − i) = 3</strong>; the imaginary parts cancel.</p>
+    </section>
+    <section class="qubit-section">
+      <h2>Applications in Quantum Computing</h2>
+      <p>Complex amplitudes encode quantum-state probabilities and relative phase. Quantum gates change those amplitudes; interference then uses phase differences to reinforce or cancel possible outcomes. This is why a circuit must track complex amplitudes rather than probabilities alone.</p>
     </section>
     ${examples.map((example, index) => `<section class="qubit-section complex-example">
       <p class="complex-example-label">Example ${index + 1}</p>
       <h2>${example.title}</h2>
       <div class="complex-example-step"><h3>Concept</h3><p>${example.concept}</p></div>
       <div class="complex-example-step"><h3>Sia Script Code</h3><pre class="hdqs-code"><code>${example.code}</code></pre></div>
-      <div class="complex-example-step"><h3>Actual Output</h3><pre class="hdqs-output"><code>${example.output}</code></pre>${example.image ? `<figure class="complex-output-figure"><img src="${example.image}" alt="${example.imageAlt}"><figcaption>${example.imageCaption} This is the original recorded output, not a recreated illustration.</figcaption></figure>` : ''}</div>
+      <div class="complex-example-step"><h3>Code Output</h3><pre class="hdqs-output"><code>${example.output.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</code></pre>${example.image ? `<figure class="complex-output-figure"><img src="${example.image}" alt="${example.imageAlt}"><figcaption>${example.imageCaption} This is the original recorded output, not a recreated illustration.</figcaption></figure>` : ''}</div>
       <div class="complex-example-step"><h3>Code Explanation</h3><p>${example.codeExplanation}</p></div>
       <div class="complex-example-step"><h3>Output Explanation</h3><p>${example.outputExplanation}</p></div>
     </section>`).join('')}
+    <aside class="key-idea"><h2>Key Takeaways</h2><ul><li>Complex numbers have real and imaginary components.</li><li>The squared magnitude of an amplitude gives a measurement probability.</li><li>Relative phase affects interference even when probabilities initially match.</li><li>Polar form turns multiplication into magnitude multiplication and angle addition.</li></ul></aside>
   </section>`;
 }
 
-function vectorsLessonTemplate() {
+function vectorsLessonTemplate(topic) {
   const examples = [
     {
       number: 6,
@@ -651,7 +719,7 @@ function vectorsLessonTemplate() {
       number: 7,
       title: 'A Complex 2-Vector: Its Components and Its Point on the Bloch Sphere',
       code: 'from sia import hdqs\nhdqs.vec([1, 1j]).draw(dpi=70);',
-      output: '&lt;Figure size 900x380 with 3 Axes&gt;',
+      output: '<Figure size 900x380 with 3 Axes>',
       image: 'images/vectors-complex-state-components.png',
       imageAlt: 'Original Sia Script output showing the two complex vector components in the complex plane and the vector’s point on a Bloch sphere.',
       imageCaption: 'Original Sia Script execution figure from Volume 1, page 6.',
@@ -666,7 +734,7 @@ function vectorsLessonTemplate() {
       number: 8,
       title: 'Projection of One Vector onto Another',
       code: 'from sia import hdqs\nhdqs.vec([3, 1]).project([1, 1]).draw(dpi=70);',
-      output: '&lt;Figure size 620x600 with 1 Axes&gt;',
+      output: '<Figure size 620x600 with 1 Axes>',
       image: 'images/vectors-projection.png',
       imageAlt: 'Original Sia Script output showing vector (3, 1) and its projection onto the direction (1, 1) in the plane.',
       imageCaption: 'Original Sia Script execution figure from Volume 1, page 7.',
@@ -681,7 +749,15 @@ function vectorsLessonTemplate() {
 
   return `<section class="qubit-lesson math-lesson vectors-lesson">
     <section class="qubit-section vectors-concept">
-      <h2>Concept: Vectors, Inner Products and Normalization</h2>
+      <h2>Introduction</h2>
+      <p>${topic.intro}</p>
+      <h2>Learning Objectives</h2>
+      <ul>
+        <li>Represent a state as an ordered vector of amplitudes.</li>
+        <li>Calculate complex inner products, norms, and normalized vectors.</li>
+        <li>Use orthogonality and normalization to interpret quantum states.</li>
+      </ul>
+      <h2>Core Concepts</h2>
       <p>A quantum state is represented by a vector: an ordered list of components. Inner products compare vectors and, for complex vectors, conjugate the components of the first vector. The norm measures a vector’s length. Normalizing a quantum state makes its norm one, so the probabilities associated with its components sum to one.</p>
     </section>
     <section class="qubit-section vectors-foundations">
@@ -691,14 +767,30 @@ function vectorsLessonTemplate() {
       <div class="vectors-formula"><math display="block" aria-label="inner product u v equals the sum from i equals one to n of complex conjugate u i times v i"><mo>⟨</mo><mi>u</mi><mo>|</mo><mi>v</mi><mo>⟩</mo><mo>=</mo><munderover><mo>∑</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>n</mi></munderover><msubsup><mi>u</mi><mi>i</mi><mo>*</mo></msubsup><msub><mi>v</mi><mi>i</mi></msub></math><p>The inner product ⟨u|v⟩ sums corresponding components. The star means complex conjugate: conjugate each component of the first vector uᵢ before multiplying it by the corresponding component vᵢ.</p></div>
       <div class="vectors-formula"><math display="block" aria-label="a normalized vector satisfies the inner product of v with v equals one"><mo>⟨</mo><mi>v</mi><mo>|</mo><mi>v</mi><mo>⟩</mo><mo>=</mo><mn>1</mn></math><p>A vector is normalized when its norm is one. Dividing a nonzero vector by its norm produces a unit vector; for a quantum state this makes the total measurement probability one.</p></div>
     </section>
+    <section class="qubit-section">
+      <h2>Important Formulas</h2>
+      <div class="qubit-equation">⟨u|v⟩ = Σᵢ uᵢ* vᵢ &nbsp;&nbsp; ∥v∥ = √⟨v|v⟩</div>
+      <div class="qubit-equation">|v̂⟩ = |v⟩ / ∥v∥ &nbsp;&nbsp; Σᵢ |αᵢ|² = 1</div>
+    </section>
+    <section class="qubit-section">
+      <h2>Step-by-Step Examples</h2>
+      <p>Let <strong>u = (1, i)</strong> and <strong>v = (1, −i)</strong>. Conjugate the first vector: <strong>u† = (1, −i)</strong>.</p>
+      <p>Then <strong>⟨u|v⟩ = 1·1 + (−i)(−i) = 1 − 1 = 0</strong>, so u and v are orthogonal.</p>
+      <p>Also <strong>⟨u|u⟩ = 1·1 + (−i)i = 2</strong>, hence <strong>∥u∥ = √2</strong> and the normalized vector is <strong>u/√2 = (1/√2, i/√2)</strong>.</p>
+    </section>
+    <section class="qubit-section">
+      <h2>Applications in Quantum Computing</h2>
+      <p>State vectors store quantum amplitudes; inner products give overlaps and measurement probabilities; norms verify normalization; and projections describe components selected by a measurement or basis change. Orthogonal vectors represent perfectly distinguishable outcomes.</p>
+    </section>
     ${examples.map((example) => `<section class="qubit-section vectors-example">
       <p class="vectors-example-label">Example ${example.number}</p>
       <h2>${example.title}</h2>
       <div class="vectors-example-step"><h3>Sia Script Code</h3><pre class="hdqs-code"><code>${example.code}</code></pre></div>
-      <div class="vectors-example-step"><h3>Actual Output</h3><pre class="hdqs-output"><code>${example.output}</code></pre>${example.image ? `<figure class="vectors-output-figure"><img src="${example.image}" alt="${example.imageAlt}"><figcaption>${example.imageCaption}</figcaption></figure>` : ''}</div>
+      <div class="vectors-example-step"><h3>Code Output</h3><pre class="hdqs-output"><code>${example.output.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</code></pre>${example.image ? `<figure class="vectors-output-figure"><img src="${example.image}" alt="${example.imageAlt}"><figcaption>${example.imageCaption}</figcaption></figure>` : ''}</div>
       <div class="vectors-example-step"><h3>Code Explanation</h3><ol class="vectors-code-explanation">${example.codeExplanation.map((line) => `<li>${line}</li>`).join('')}</ol></div>
       <div class="vectors-example-step"><h3>Output Explanation</h3><p>${example.outputExplanation}</p></div>
     </section>`).join('')}
+    <aside class="key-idea vectors-takeaway"><h2>Key Takeaways</h2><ul><li>A vector lists amplitudes in an ordered basis.</li><li>Complex inner products conjugate the first vector.</li><li>The norm measures length; normalization makes it one.</li><li>Orthogonality means zero inner product.</li><li>Born probabilities are squared amplitude magnitudes.</li></ul></aside>
   </section>`;
 }
 
@@ -945,6 +1037,9 @@ eigenvalue −1: P = |⟨−|ψ⟩|² = 1/2 → |ψ after⟩ = √(1/2)|0⟩ −
 eigenvalue 1: P = |⟨+|ψ⟩|² = 1/2 → |ψ after⟩ = √(1/2)|0⟩ + √(1/2)|1⟩
 A = Σ λ·P(λ) = 0
 <Figure size 490x380 with 1 Axes>`,
+      image: 'images/expectation-measurement-observable.png',
+      imageAlt: 'Sia Script measurement plot showing equal probabilities for observable eigenvalues negative one and positive one.',
+      imageCaption: 'The two possible measurement values each occur with probability 1/2 in the prepared state.',
       codeExplanation: 'The code creates an x-spin observable, measures it on the input state |0⟩, requests a textual explanation, and draws the measurement summary.',
       outputExplanation: 'The two eigenvalues, −1 and +1, each occur with probability 1/2. The output also shows the corresponding post-measurement states and an expectation value of zero.'
     }, {
@@ -1061,29 +1156,156 @@ hdqs.explore("hilbert", "hilbert_hi.html", lang="hi")`, output: "'hilbert_hi.htm
   }
 };
 
-function documentedMathLessonTemplate(topic) {
-  const lesson = documentedMathLessons[topic.slug];
-  if (!lesson) throw new Error(`Missing documented mathematics lesson: ${topic.slug}`);
+const mathLessonGuides = {
+  'tensor-products': {
+    core: '<p>For product states, each pair of subsystem amplitudes multiplies. A general joint state need not factor into a product; such non-factorable states include entangled states. The order of the tensor factors fixes the basis ordering.</p>',
+    objectives: ['Form tensor products of state vectors in a stated basis order.', 'Determine the dimension and basis states of a combined register.', 'Distinguish product states from entangled states and identify how local gates act.'],
+    formulas: '<ul><li><strong>(a₀,a₁)ᵀ ⊗ (b₀,b₁)ᵀ = (a₀b₀,a₀b₁,a₁b₀,a₁b₁)ᵀ</strong>.</li><li><strong>dim(ℋ<sub>A</sub> ⊗ ℋ<sub>B</sub>) = dim(ℋ<sub>A</sub>) dim(ℋ<sub>B</sub>)</strong>.</li><li><strong>(A ⊗ B)(|a⟩ ⊗ |b⟩) = A|a⟩ ⊗ B|b⟩</strong> for separate subsystem operations.</li></ul>',
+    workedExample: '<ol><li>Write <strong>|0⟩ = (1,0)ᵀ</strong> and <strong>|1⟩ = (0,1)ᵀ</strong>.</li><li>Form their tensor product in the stated basis order: <strong>|0⟩ ⊗ |1⟩ = (1·0, 1·1, 0·0, 0·1)ᵀ = (0,1,0,0)ᵀ = |01⟩</strong>.</li><li>For <strong>|+⟩ ⊗ |−⟩</strong>, the four components are <strong>(1,−1,1,−1)/2</strong>; its squared norm is <strong>4·(1/2)² = 1</strong>.</li></ol>',
+    applications: '<p>Tensor products represent registers containing multiple qubits, lift single-qubit gates into joint systems, and provide a basis for describing entanglement. For example, a two-qubit register has four computational-basis amplitudes even when prepared by separate one-qubit operations.</p>',
+    takeaways: ['Tensor products combine subsystem state spaces.', 'Dimensions multiply and basis order matters.', 'Product states factor; entangled states generally do not.', 'Local gates act on their subsystem factors.']
+  },
+  'matrices-matrix-operations': {
+    core: '<p>A matrix is a rectangular array defining a linear map once its input and output bases are fixed. Addition is entrywise; multiplication composes maps, so order matters. Only square matrices have a determinant, trace, and ordinary inverse.</p>',
+    objectives: ['Perform matrix addition and multiplication and explain why order matters.', 'Calculate the determinant, trace, inverse, and conjugate transpose of a small matrix.', 'Relate matrix operations to quantum gates and state transformations.'],
+    formulas: '<ul><li><strong>(AB)<sub>ij</sub> = Σ<sub>k</sub> A<sub>ik</sub>B<sub>kj</sub></strong> is matrix multiplication.</li><li><strong>tr(A) = Σᵢ A<sub>ii</sub></strong> is the trace.</li><li><strong>A⁻¹A = I</strong> when the inverse exists; for a square matrix this requires <strong>det(A) ≠ 0</strong>.</li><li><strong>A† = (A*)ᵀ</strong> is the conjugate transpose.</li></ul>',
+    workedExample: '<ol><li>For <strong>A = [[1,2],[3,4]]</strong>, <strong>det(A) = 1·4 − 2·3 = −2</strong>, so A is invertible.</li><li><strong>A⁻¹ = (1/−2)[[4,−2],[−3,1]] = [[−2,1],[3/2,−1/2]]</strong>.</li><li>The trace is <strong>tr(A) = 1 + 4 = 5</strong>. Multiplying A⁻¹A returns I.</li></ol>',
+    applications: '<p>Quantum gates are matrices in a chosen basis, and applying gates composes matrix transformations. Determinants, traces, and daggers help characterize operators; in quantum computing, unitarity is the key validity condition for reversible gate evolution.</p>',
+    takeaways: ['Matrix multiplication composes linear transformations.', 'Multiplication order generally changes the result.', 'A nonzero determinant means a square matrix is invertible.', 'The dagger transposes and complex-conjugates entries.']
+  },
+  'eigenvalues-eigenvectors': {
+    core: '<p>An eigenvector is a direction preserved by a linear operator, though its magnitude or phase may change. For a Hermitian observable, eigenvalues are real and label possible measurement results; an eigenstate produces its eigenvalue with certainty.</p>',
+    objectives: ['Solve a characteristic equation to find eigenvalues.', 'Check an eigenvector using A|v⟩ = λ|v⟩.', 'Connect observable eigenvalues and eigenspaces to possible measurement outcomes.'],
+    formulas: '<ul><li><strong>A|v⟩ = λ|v⟩</strong> defines an eigenpair.</li><li><strong>det(A − λI) = 0</strong> gives candidate eigenvalues.</li><li><strong>P(λ) = ⟨ψ|Π<sub>λ</sub>|ψ⟩</strong> gives the probability of an observable’s eigenvalue, where Π<sub>λ</sub> projects onto its eigenspace.</li></ul>',
+    workedExample: '<ol><li>For the Pauli-Y matrix <strong>Y = [[0,−i],[i,0]]</strong>, <strong>det(Y − λI) = λ² − 1</strong>.</li><li>Setting this to zero gives <strong>λ = ±1</strong>.</li><li>Normalized eigenvectors are <strong>|y<sub>+</sub>⟩ = (1,i)ᵀ/√2</strong> and <strong>|y<sub>−</sub>⟩ = (1,−i)ᵀ/√2</strong>; applying Y returns the same vector times its eigenvalue.</li></ol>',
+    applications: '<p>Eigenvectors identify states unchanged in direction by an operation. In measurement, an observable’s eigenspaces determine the possible outcomes and the state subspaces selected by each outcome. Eigenanalysis also helps study Hamiltonians and quantum dynamics.</p>',
+    takeaways: ['Eigenvectors satisfy A|v⟩ = λ|v⟩.', 'Solve det(A − λI) = 0 to find eigenvalues.', 'Hermitian observables have real eigenvalues.', 'An eigenstate gives its associated measurement value with certainty.']
+  },
+  'hermitian-unitary-matrices': {
+    core: '<p>Hermitian operators are equal to their own conjugate transpose and model observables. Unitary operators have an inverse equal to their dagger and preserve inner products, norms, and total probability. These are related but distinct properties.</p>',
+    objectives: ['Test whether a matrix is Hermitian or unitary using its dagger.', 'Explain why Hermitian operators represent observables and unitary operators represent reversible gates.', 'Use a commutator to determine whether two operators commute.'],
+    formulas: '<ul><li><strong>A† = A</strong> means A is Hermitian.</li><li><strong>U†U = UU† = I</strong> means U is unitary.</li><li><strong>[A,B] = AB − BA</strong> is the commutator; zero means the operators commute.</li><li>For Pauli matrices, <strong>[X,Y] = 2iZ</strong>.</li></ul>',
+    workedExample: '<ol><li>Pauli-X is real and symmetric, so <strong>X† = X</strong>.</li><li>Since <strong>X² = I</strong>, it follows that <strong>X†X = I</strong>; X is also unitary.</li><li>For X and Y, <strong>XY = iZ</strong> and <strong>YX = −iZ</strong>, hence <strong>[X,Y] = 2iZ</strong>.</li></ol>',
+    applications: '<p>Hermitian operators define measurable quantities with real outcomes. Unitary matrices represent ideal gates and closed-system evolution because they preserve state normalization and inner products. Commutators help determine whether two observables share a common eigenbasis.</p>',
+    takeaways: ['Hermitian and unitary are different tests.', 'Hermitian observables have real measurement values.', 'Unitary operations preserve norms and probabilities.', 'A nonzero commutator signals order-dependent operations.']
+  },
+  'matrix-vector-multiplication': {
+    core: '<p>A matrix acts on a column vector by taking a dot product between each matrix row and the input vector. Each output amplitude is therefore a weighted sum of input amplitudes. A valid quantum gate is a unitary matrix, which preserves the state norm.</p>',
+    objectives: ['Compute a matrix-vector product one row at a time.', 'Apply the Hadamard matrix to a computational-basis state.', 'Explain how a unitary gate changes amplitudes while preserving normalization.'],
+    formulas: '<ul><li><strong>(A|ψ⟩)<sub>i</sub> = Σⱼ A<sub>ij</sub>ψ<sub>j</sub></strong>.</li><li><strong>|ψ′⟩ = U|ψ⟩</strong> describes a gate acting on a state.</li><li><strong>H = (1/√2)[[1,1],[1,−1]]</strong> and <strong>H² = I</strong>.</li></ul>',
+    workedExample: '<ol><li>Write <strong>|0⟩ = (1,0)ᵀ</strong>.</li><li>Multiply each row of H by the vector: <strong>H|0⟩ = (1/√2)(1·1 + 1·0, 1·1 − 1·0)ᵀ</strong>.</li><li>The result is <strong>(1,1)ᵀ/√2 = |+⟩</strong>. A second H returns |0⟩ because <strong>H² = I</strong>.</li></ol>',
+    applications: '<p>Every gate application in a state-vector simulation is a matrix–vector product (or a structured equivalent that avoids forming a full matrix). This operation updates amplitudes before later gates and measurements.</p>',
+    takeaways: ['Each output component is a row–vector dot product.', 'The matrix acts on the state from the left.', 'Gate order matters because matrix products need not commute.', 'A unitary gate preserves state normalization.']
+  },
+  'dirac-notation': {
+    core: '<p>A ket |ψ⟩ is a state column vector; its bra ⟨ψ| is the conjugate transpose row. Inner products are scalars measuring overlap, while outer products are operators. The basis identity decomposes any state into its basis components.</p>',
+    objectives: ['Translate between a state vector and ket notation.', 'Form bras, inner products, and outer-product operators.', 'Use orthogonality, normalization, and the identity resolution in quantum calculations.'],
+    formulas: '<ul><li><strong>⟨ψ| = (|ψ⟩)†</strong>.</li><li><strong>⟨ϕ|ψ⟩</strong> is an inner product; <strong>|ψ⟩⟨ϕ|</strong> is an outer product.</li><li><strong>⟨ψ|ψ⟩ = 1</strong> for a normalized state.</li><li><strong>Σᵢ |i⟩⟨i| = I</strong> for a complete orthonormal basis.</li></ul>',
+    workedExample: '<ol><li><strong>|+⟩ = (|0⟩ + |1⟩)/√2</strong> and <strong>|−⟩ = (|0⟩ − |1⟩)/√2</strong>.</li><li>Taking the bra of |+⟩ and evaluating the overlap gives <strong>⟨+|−⟩ = (1/2)(1 − 1) = 0</strong>; the states are orthogonal.</li><li>The projector is <strong>|+⟩⟨+| = (1/2)[[1,1],[1,1]]</strong>, a matrix that selects the |+⟩ component.</li></ol>',
+    applications: '<p>Dirac notation makes circuit states, overlaps, projectors, and measurement updates compact. It is especially useful for multi-qubit registers, where basis labels such as |00⟩ and |11⟩ are easier to read than long column vectors.</p>',
+    takeaways: ['Bras are conjugate transposes of kets.', 'Inner products return numbers; outer products return operators.', 'Orthogonal states have zero overlap.', 'A complete basis resolves the identity.']
+  },
+  'quantum-states-observables': {
+    core: '<p>A pure state is a normalized ket. More generally, a density operator ρ describes pure or mixed states; it is positive and has trace one. An observable is Hermitian, and its spectral projectors determine possible outcomes and their probabilities.</p>',
+    objectives: ['Distinguish pure-state kets from density operators.', 'Identify an observable’s eigenvalues and spectral projectors.', 'Calculate outcome probabilities from amplitudes or density matrices.'],
+    formulas: '<ul><li><strong>|ψ⟩ = Σₓ αₓ|x⟩</strong> with <strong>Σₓ|αₓ|² = 1</strong>.</li><li><strong>ρ = |ψ⟩⟨ψ|</strong> for a pure state; <strong>tr(ρ) = 1</strong>.</li><li><strong>O = Σₖ oₖΠₖ</strong> is the spectral form of an observable.</li><li><strong>P(oₖ) = tr(ρΠₖ)</strong> gives an outcome probability.</li></ul>',
+    workedExample: '<ol><li>For <strong>|ϕ⁺⟩ = (|00⟩ + |11⟩)/√2</strong>, the nonzero basis probabilities are <strong>|1/√2|² = 1/2</strong> for 00 and 11.</li><li>For <strong>ZZ</strong>, both 00 and 11 have eigenvalue +1.</li><li>Therefore <strong>P(+1) = 1/2 + 1/2 = 1</strong> and the joint observable returns +1 with certainty.</li></ol>',
+    applications: '<p>State vectors or density matrices describe the system being processed. Observables connect that state to measured quantities such as qubit values, parity, or energy. Circuit algorithms prepare states and transform them so useful observable statistics can be estimated.</p>',
+    takeaways: ['Quantum states must be normalized.', 'Observables are Hermitian operators.', 'Spectral projectors define outcome probabilities.', 'Entangled states can have correlations not captured by separate single-qubit states.']
+  },
+  'expectation-measurement': {
+    core: '<p>A measurement yields one eigenvalue on an individual run. Repeating it on identically prepared states produces a distribution; the expectation is its mean, and variance or standard deviation describes its spread.</p>',
+    objectives: ['Calculate an observable’s expectation value and variance.', 'Distinguish a single measurement outcome from an ensemble average.', 'Explain how repeated circuit shots estimate measurement statistics.'],
+    formulas: '<ul><li><strong>⟨A⟩ = ⟨ψ|A|ψ⟩ = Σₖ aₖP(aₖ)</strong>.</li><li><strong>(ΔA)² = ⟨A²⟩ − ⟨A⟩²</strong>.</li><li><strong>ΔA = √((ΔA)²)</strong>.</li><li>For projective measurement, <strong>P(aₖ) = ⟨ψ|Πₖ|ψ⟩</strong>.</li></ul>',
+    workedExample: '<ol><li>In <strong>|+⟩ = (|0⟩+|1⟩)/√2</strong>, measuring Z gives +1 and −1 with probability 1/2 each.</li><li>The mean is <strong>⟨Z⟩ = (1)(1/2) + (−1)(1/2) = 0</strong>.</li><li><strong>⟨Z²⟩ = 1</strong>, so the variance is <strong>1 − 0² = 1</strong> and the standard deviation is 1. In |0⟩, Z is certain and its standard deviation is 0.</li></ol>',
+    applications: '<p>Expectation values estimate energies, Pauli correlations, and objective functions in quantum algorithms. A circuit typically estimates them from repeated shots; finite samples fluctuate around the ideal mean, so uncertainty and shot counts matter.</p>',
+    takeaways: ['A single measurement is a sample, not the expectation value.', 'Expectation values are probability-weighted averages.', 'Variance measures spread and is nonnegative.', 'Repeated shots estimate ideal observable statistics.']
+  },
+  'quantum-dynamics-uncertainty': {
+    core: '<p>The Hamiltonian H generates closed-system time evolution. For a time-independent Hermitian H, its exponential gives a unitary transformation. Uncertainty relations constrain the spreads of observables whose operators do not commute.</p>',
+    objectives: ['Use the Hamiltonian to write the time-evolution operator.', 'Derive a simple state trajectory and its measurement probabilities.', 'Apply the Robertson uncertainty relation to incompatible observables.'],
+    formulas: '<ul><li><strong>iℏ d|ψ⟩/dt = H|ψ⟩</strong> is the Schrödinger equation.</li><li><strong>U(t) = e<sup>−iHt/ℏ</sup></strong> and <strong>|ψ(t)⟩ = U(t)|ψ(0)⟩</strong>.</li><li><strong>ΔA ΔB ≥ (1/2)|⟨[A,B]⟩|</strong> is the Robertson uncertainty relation.</li></ul>',
+    workedExample: '<ol><li>With <strong>H = X</strong> and ℏ = 1, use <strong>X² = I</strong> to expand <strong>e<sup>−itX</sup> = cos(t)I − i sin(t)X</strong>.</li><li>Acting on |0⟩ gives <strong>|ψ(t)⟩ = cos(t)|0⟩ − i sin(t)|1⟩</strong>; therefore <strong>P(0)=cos²(t)</strong> and <strong>P(1)=sin²(t)</strong>.</li><li>For |0⟩, <strong>[X,Y]=2iZ</strong> and ⟨Z⟩=1, so the uncertainty lower bound is 1; ΔX=ΔY=1 attains it.</li></ol>',
+    applications: '<p>Hamiltonians model physical dynamics and compile into gate sequences that approximate time evolution. Uncertainty analysis helps interpret measurement limits and choose observables or experiments whose statistics reveal the desired properties.</p>',
+    takeaways: ['A Hermitian Hamiltonian generates unitary evolution.', 'Matrix exponentials turn continuous dynamics into operators.', 'Uncertainty depends on both state and observables.', 'Noncommuting observables can impose a nonzero lower bound.']
+  },
+  'sequential-measurement': {
+    core: '<p>After a projective measurement with outcome projector Π, a pure state becomes Π|ψ⟩/√P when P is nonzero. Sequential outcome probabilities depend on this updated state. Post-selection keeps only runs matching a specified outcome and must account for the success probability.</p>',
+    objectives: ['Update a state after a specified projective measurement.', 'Calculate joint and conditional probabilities for a measurement sequence.', 'Explain post-selection and report its success probability.'],
+    formulas: '<ul><li><strong>P(k) = ⟨ψ|Πₖ|ψ⟩</strong>.</li><li><strong>|ψ′⟩ = Πₖ|ψ⟩/√P(k)</strong> is the normalized post-measurement state.</li><li><strong>P(j then k) = ∥ΠₖΠⱼ|ψ⟩∥²</strong> for successive projective outcomes.</li><li>For a selected event E and later outcome F, <strong>P(F|E)=P(F∩E)/P(E)</strong>.</li></ul>',
+    workedExample: '<ol><li>Start in |0⟩, the +z eigenstate, so the first +z result has probability 1.</li><li>Measuring x next gives +x or −x with probability 1/2 each.</li><li>Either x eigenstate gives +z or −z with probability 1/2 at the final z analyser. Thus each complete path has probability <strong>1·(1/2)·(1/2)=1/4</strong>.</li><li>If only the +z then +x runs are retained, the final z outcomes are conditionally 1/2 each; each joint path remains 1/4 of all initial runs.</li></ol>',
+    applications: '<p>Mid-circuit measurements and classical feed-forward use this state-update rule in quantum circuits. Post-selection is useful in some demonstrations and protocols, but it discards runs, so success rates and conditional probabilities must be reported.</p>',
+    takeaways: ['Measurement changes the state used by later operations.', 'Sequential probabilities use conditional state updates.', 'Post-selection conditions on a subset of runs.', 'Distinguish joint probabilities from probabilities conditioned on success.']
+  },
+  'mathematical-explorers': {
+    core: '<p>Interactive explorers let learners vary a state, operator, or measurement and observe the resulting geometry or statistics. They are visual aids for the same linear algebra and probability rules, not substitutes for derivation or evidence.</p>',
+    objectives: ['Identify which mathematical concept an explorer visualizes.', 'Generate and open an explorer with the documented Sia Script interface.', 'Connect a visual change to its equations and distinguish illustration from proof.'],
+    formulas: '<ul><li><strong>|ψ⟩ = Σₓ αₓ|x⟩</strong> represents a state in a basis.</li><li><strong>P(x)=|αₓ|²</strong> links amplitudes to measurement statistics.</li><li><strong>|ψ′⟩=U|ψ⟩</strong> shows how a gate transforms the state.</li><li><strong>U†U=I</strong> is the norm-preservation condition for a unitary gate.</li></ul>',
+    workedExample: '<ol><li>Choose an explorer such as <strong>phasor</strong> and generate it using the documented Sia Script call.</li><li>Inspect the returned filename, then open the generated HTML page in a browser.</li><li>Change one control at a time and connect the visual change to the associated equation or state representation.</li><li>Use the displayed values as an illustration; verify conclusions with the mathematical definitions and, when needed, the recorded Sia Script outputs.</li></ol>',
+    applications: '<p>Explorers support intuition for complex phase, matrix transformations, state evolution, interference, and measurement. In algorithm study, visualizing a state or circuit can help form a hypothesis before checking it algebraically or with a simulator.</p>',
+    takeaways: ['An explorer is an interactive aid, not a proof.', 'Change one parameter at a time to see cause and effect.', 'Relate every visualization to its formula and assumptions.', 'The documented Sia Script call returns a page filename.']
+  }
+};
+
+function renderStructuredMathLesson(topic, lesson, guide, lessonClass) {
+  if (!guide) throw new Error(`Missing mathematical lesson guide: ${topic.slug}`);
   const escapeText = (text) => text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-  return `<section class="qubit-lesson math-lesson complex-numbers-lesson documented-math-lesson">
+  const examples = (lesson.examples || []).map((example) => {
+    const codeExplanation = Array.isArray(example.codeExplanation)
+      ? `<ol class="vectors-code-explanation">${example.codeExplanation.map((line) => `<li>${line}</li>`).join('')}</ol>`
+      : `<p>${example.codeExplanation}</p>`;
+    return `<section class="qubit-section complex-example">
+      <p class="complex-example-label">Example ${example.number}</p>
+      <h2>${escapeText(example.title)}</h2>
+      ${example.concept ? `<div class="complex-example-step"><h3>Concept</h3><p>${example.concept}</p></div>` : ''}
+      <div class="complex-example-step"><h3>Sia Script Code</h3><pre class="hdqs-code"><code>${escapeText(example.code)}</code></pre></div>
+      <div class="complex-example-step"><h3>Code Output</h3><pre class="hdqs-output"><code>${escapeText(example.output)}</code></pre>${example.image ? `<figure class="documented-output-figure"><img src="${escapeText(example.image)}" alt="${escapeText(example.imageAlt)}"><figcaption>${escapeText(example.imageCaption)}</figcaption></figure>` : ''}</div>
+      <div class="complex-example-step"><h3>Code Explanation</h3>${codeExplanation}</div>
+      <div class="complex-example-step"><h3>Output Explanation</h3><p>${example.outputExplanation}</p></div>
+    </section>`;
+  }).join('');
+  return `<section class="qubit-lesson math-lesson ${lessonClass} documented-math-lesson">
+    <section class="qubit-section">
+      <h2>Introduction</h2>
+      <p>${escapeText(topic.intro)}</p>
+    </section>
+    <section class="qubit-section">
+      <h2>Learning Objectives</h2>
+      <ul>${guide.objectives.map((item) => `<li>${escapeText(item)}</li>`).join('')}</ul>
+    </section>
     <section class="qubit-section complex-concept">
-      <h2>Concept</h2>
+      <h2>Core Concepts</h2>
       <p>${lesson.concept}</p>
+      ${guide.core || ''}
     </section>
     <section class="qubit-section tensor-foundations">
       <h2>Mathematical Foundations</h2>
       ${lesson.foundation}
     </section>
-    ${lesson.examples.map((example) => `<section class="qubit-section complex-example">
-      <p class="complex-example-label">Example ${example.number}</p>
-      <h2>${example.title}</h2>
-      ${example.concept ? `<div class="complex-example-step"><h3>Concept</h3><p>${example.concept}</p></div>` : ''}
-      <div class="complex-example-step"><h3>Sia Script Code</h3><pre class="hdqs-code"><code>${escapeText(example.code)}</code></pre></div>
-      <div class="complex-example-step"><h3>Actual Output</h3><pre class="hdqs-output"><code>${escapeText(example.output)}</code></pre>${example.image ? `<figure class="documented-output-figure"><img src="${example.image}" alt="${example.imageAlt}"><figcaption>${example.imageCaption}</figcaption></figure>` : ''}</div>
-      <div class="complex-example-step"><h3>Code Explanation</h3><p>${example.codeExplanation}</p></div>
-      <div class="complex-example-step"><h3>Output Explanation</h3><p>${example.outputExplanation}</p></div>
-    </section>`).join('')}
+    <section class="qubit-section">
+      <h2>Important Formulas</h2>
+      ${guide.formulas}
+    </section>
+    <section class="qubit-section">
+      <h2>Step-by-Step Examples</h2>
+      ${guide.workedExample}
+    </section>
+    <section class="qubit-section">
+      <h2>Applications in Quantum Computing</h2>
+      ${guide.applications}
+    </section>
+    ${examples}
+    <aside class="key-idea">
+      <h2>Key Takeaways</h2>
+      <ul>${guide.takeaways.map((item) => `<li>${escapeText(item)}</li>`).join('')}</ul>
+    </aside>
   </section>`;
+}
+
+function documentedMathLessonTemplate(topic) {
+  const lesson = documentedMathLessons[topic.slug];
+  if (!lesson) throw new Error(`Missing documented mathematics lesson: ${topic.slug}`);
+  return renderStructuredMathLesson(topic, lesson, mathLessonGuides[topic.slug], 'complex-numbers-lesson');
 }
 
 function topicTemplate(topicIndex) {
@@ -1111,9 +1333,35 @@ function topicTemplate(topicIndex) {
 }
 
 function renderContents() {
+  const lessonGrid = $('.lesson-grid');
+  const isMathLesson = state.activeChapter === 1;
+  lessonGrid.classList.toggle('has-topic-contents', state.activeChapter >= 2 && state.activeChapter <= 3);
+  lessonGrid.classList.toggle('math-content-expanded', isMathLesson);
+  $('.lesson-aside').hidden = isMathLesson;
+  $('.contents-card').hidden = isMathLesson;
+  const pageContents = $('#page-contents');
+  if (isMathLesson) {
+    pageContents.replaceChildren();
+    return;
+  }
   const headings = [...$('#lesson-body').querySelectorAll('h2, h3')];
-  $('#page-contents').innerHTML = headings.map((heading, index) => { const id = `section-${index}`; heading.id = id; return `<button data-target="${id}">${heading.textContent}</button>`; }).join('');
-  $('#page-contents').querySelectorAll('button').forEach((button) => button.addEventListener('click', () => document.getElementById(button.dataset.target).scrollIntoView({ behavior: 'smooth' })));
+  pageContents.innerHTML = headings.map((heading, index) => {
+    const id = `section-${index}`;
+    heading.id = id;
+    return `<button type="button" data-target="${id}">${heading.textContent}</button>`;
+  }).join('');
+  pageContents.querySelectorAll('button').forEach((button) => button.addEventListener('click', () => {
+    const target = document.getElementById(button.dataset.target);
+    if (target) {
+      const topbar = $('.topbar');
+      const offset = topbar ? topbar.getBoundingClientRect().height + 16 : 16;
+      const scrollRoot = document.scrollingElement || document.documentElement;
+      scrollRoot.scrollTo({
+        top: target.getBoundingClientRect().top + scrollRoot.scrollTop - offset,
+        behavior: 'instant'
+      });
+    }
+  }));
 }
 
 function wireInteractions(index) {
@@ -1228,7 +1476,348 @@ function fundamentalsIntroductionTemplate() {
   </section>`;
 }
 
+function highlightBasicCircuitCode(source) {
+  const keywords = new Set(['from', 'import', 'print', 'for', 'in', 'try', 'except', 'as']);
+  const tokenPattern = /("""[\s\S]*?"""|#[^\r\n]*|"(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*'|\b(?:from|import|print|for|in|try|except|as)\b|\b\d+(?:\.\d+)?\b)/g;
+  return source.split(tokenPattern).map((token) => {
+    if (!token) return '';
+    const className = token.startsWith('#') ? 'token-comment'
+      : token.startsWith('"') || token.startsWith("'") ? 'token-string'
+        : keywords.has(token) ? 'token-keyword'
+          : /^\d/.test(token) ? 'token-number'
+            : '';
+    const escaped = escapeCode(token);
+    return className ? `<span class="${className}">${escaped}</span>` : escaped;
+  }).join('');
+}
+
+function basicCircuitExample(id, title, concept, code, output, codeExplanation, outputExplanation) {
+  return `<div class="basic-circuit-example">
+    <h4 id="${id}">${title}</h4>
+    <p class="basic-example-concept"><strong>Concept:</strong> ${concept}</p>
+    <p class="card-label">Sia Script Code · Python</p>
+    <pre class="hdqs-code"><code class="language-python">${highlightBasicCircuitCode(code)}</code></pre>
+    <p class="card-label">Output</p>
+    <pre class="hdqs-output"><code>${escapeCode(output)}</code></pre>
+    <p class="card-label">Code Explanation</p>
+    <ul class="code-explanation">${codeExplanation.map((line) => `<li>${line}</li>`).join('')}</ul>
+    <p class="card-label">Output Explanation</p>
+    <p>${outputExplanation}</p>
+  </div>`;
+}
+
+function basicCircuitVisual(name) {
+  const visuals = {
+    hadamard: `<figure class="basic-circuit-visual">
+      <svg viewBox="0 0 430 74" role="img" aria-labelledby="hadamard-circuit-title hadamard-circuit-desc">
+        <title id="hadamard-circuit-title">Hadamard superposition circuit</title>
+        <desc id="hadamard-circuit-desc">A qubit in zero passes through an H gate and is sampled, producing zero or one.</desc>
+        <text x="12" y="41">q₀: |0⟩</text><line x1="75" y1="36" x2="165" y2="36" class="circuit-wire"/>
+        <rect x="165" y="17" width="42" height="38" rx="4" class="circuit-gate"/>
+        <text x="186" y="42" text-anchor="middle" class="circuit-gate-label">H</text>
+        <line x1="207" y1="36" x2="290" y2="36" class="circuit-wire"/>
+        <circle cx="310" cy="36" r="15" class="circuit-measure"/>
+        <text x="310" y="41" text-anchor="middle" class="circuit-measure-label">M</text>
+        <line x1="325" y1="36" x2="352" y2="36" class="circuit-wire"/>
+        <text x="360" y="41">0 / 1</text>
+      </svg>
+      <figcaption>One Hadamard gate prepares equal amplitudes; measurement samples one classical result.</figcaption>
+    </figure>`,
+    bell: `<figure class="basic-circuit-visual">
+      <svg viewBox="0 0 500 112" role="img" aria-labelledby="bell-circuit-title bell-circuit-desc">
+        <title id="bell-circuit-title">Bell state preparation circuit</title>
+        <desc id="bell-circuit-desc">Hadamard on qubit zero followed by controlled X from qubit zero to qubit one.</desc>
+        <text x="12" y="39">q₀: |0⟩</text><text x="12" y="86">q₁: |0⟩</text>
+        <line x1="75" y1="34" x2="130" y2="34" class="circuit-wire"/>
+        <line x1="75" y1="81" x2="250" y2="81" class="circuit-wire"/>
+        <rect x="130" y="15" width="42" height="38" rx="4" class="circuit-gate"/>
+        <text x="151" y="40" text-anchor="middle" class="circuit-gate-label">H</text>
+        <line x1="172" y1="34" x2="250" y2="34" class="circuit-wire"/>
+        <line x1="270" y1="34" x2="270" y2="81" class="circuit-control-line"/>
+        <circle cx="270" cy="34" r="6" class="circuit-control"/>
+        <circle cx="270" cy="81" r="13" class="circuit-target"/>
+        <line x1="270" y1="70" x2="270" y2="92" class="circuit-target-mark"/>
+        <line x1="259" y1="81" x2="281" y2="81" class="circuit-target-mark"/>
+        <line x1="276" y1="34" x2="372" y2="34" class="circuit-wire"/>
+        <line x1="283" y1="81" x2="372" y2="81" class="circuit-wire"/>
+        <circle cx="389" cy="34" r="14" class="circuit-measure"/><text x="389" y="39" text-anchor="middle" class="circuit-measure-label">M</text>
+        <circle cx="389" cy="81" r="14" class="circuit-measure"/><text x="389" y="86" text-anchor="middle" class="circuit-measure-label">M</text>
+        <text x="415" y="39">00/11</text>
+      </svg>
+      <figcaption>H creates two branches; CX correlates them, so the ideal Bell-state samples are 00 or 11.</figcaption>
+    </figure>`,
+    ghz: `<figure class="basic-circuit-visual">
+      <svg viewBox="0 0 510 176" role="img" aria-labelledby="ghz-circuit-title ghz-circuit-desc">
+        <title id="ghz-circuit-title">Five-qubit GHZ preparation circuit</title>
+        <desc id="ghz-circuit-desc">Hadamard on the first qubit and a chain of controlled-X gates linking each qubit in order.</desc>
+        <text x="8" y="29">q₀: |0⟩</text><text x="8" y="60">q₁: |0⟩</text><text x="8" y="91">q₂: |0⟩</text><text x="8" y="122">q₃: |0⟩</text><text x="8" y="153">q₄: |0⟩</text>
+        <line x1="70" y1="24" x2="108" y2="24" class="circuit-wire"/>
+        <line x1="70" y1="55" x2="170" y2="55" class="circuit-wire"/>
+        <line x1="70" y1="86" x2="230" y2="86" class="circuit-wire"/>
+        <line x1="70" y1="117" x2="290" y2="117" class="circuit-wire"/>
+        <line x1="70" y1="148" x2="350" y2="148" class="circuit-wire"/>
+        <rect x="108" y="6" width="36" height="36" rx="4" class="circuit-gate"/><text x="126" y="30" text-anchor="middle" class="circuit-gate-label">H</text>
+        <line x1="162" y1="24" x2="162" y2="55" class="circuit-control-line"/><circle cx="162" cy="24" r="5" class="circuit-control"/><circle cx="162" cy="55" r="10" class="circuit-target"/><path d="M162 47v16m-8-8h16" class="circuit-target-mark"/>
+        <line x1="222" y1="55" x2="222" y2="86" class="circuit-control-line"/><circle cx="222" cy="55" r="5" class="circuit-control"/><circle cx="222" cy="86" r="10" class="circuit-target"/><path d="M222 78v16m-8-8h16" class="circuit-target-mark"/>
+        <line x1="282" y1="86" x2="282" y2="117" class="circuit-control-line"/><circle cx="282" cy="86" r="5" class="circuit-control"/><circle cx="282" cy="117" r="10" class="circuit-target"/><path d="M282 109v16m-8-8h16" class="circuit-target-mark"/>
+        <line x1="342" y1="117" x2="342" y2="148" class="circuit-control-line"/><circle cx="342" cy="117" r="5" class="circuit-control"/><circle cx="342" cy="148" r="10" class="circuit-target"/><path d="M342 140v16m-8-8h16" class="circuit-target-mark"/>
+        <line x1="144" y1="24" x2="402" y2="24" class="circuit-wire"/><line x1="172" y1="55" x2="402" y2="55" class="circuit-wire"/><line x1="232" y1="86" x2="402" y2="86" class="circuit-wire"/><line x1="292" y1="117" x2="402" y2="117" class="circuit-wire"/><line x1="352" y1="148" x2="402" y2="148" class="circuit-wire"/>
+        <text x="414" y="91">CX chain</text>
+      </svg>
+      <figcaption>Each CX extends the correlation by one qubit; the documented five-qubit output contains only 00000 and 11111.</figcaption>
+    </figure>`,
+    wState: `<figure class="basic-circuit-visual basic-w-state">
+      <div class="w-state-term"><strong>|001⟩</strong><span class="w-state-bar"><i></i></span><small>amplitude 0.577 · probability 33.3%</small></div>
+      <div class="w-state-term"><strong>|010⟩</strong><span class="w-state-bar"><i></i></span><small>amplitude 0.577 · probability 33.3%</small></div>
+      <div class="w-state-term"><strong>|100⟩</strong><span class="w-state-bar"><i></i></span><small>amplitude 0.577 · probability 33.3%</small></div>
+      <figcaption>|W₃⟩ = (|001⟩ + |010⟩ + |100⟩) / √3: one excitation is shared equally across three basis states.</figcaption>
+    </figure>`,
+    bellProbabilities: `<figure class="basic-circuit-visual basic-probability-visual">
+      <div><span>|00⟩</span><i><b style="width:50%"></b></i><strong>50%</strong></div>
+      <div><span>|01⟩</span><i><b style="width:0%"></b></i><strong>0%</strong></div>
+      <div><span>|10⟩</span><i><b style="width:0%"></b></i><strong>0%</strong></div>
+      <div><span>|11⟩</span><i><b style="width:50%"></b></i><strong>50%</strong></div>
+      <figcaption>Bell-state probability bars from Example 52; only |00⟩ and |11⟩ have nonzero probability.</figcaption>
+    </figure>`
+  };
+  return visuals[name];
+}
+
+function basicCircuitsLessonTemplate() {
+  const example = basicCircuitExample;
+  return `<section class="gates-lesson math-lesson circuit-lesson basic-circuits-lesson">
+    <section class="qubit-section">
+      <h2>1. Introduction to Quantum Circuits</h2>
+      <p>A quantum circuit is an ordered program for preparing a register, applying gates, and sampling or inspecting its resulting state. A circuit makes the computation explicit: the register is the system, each chained gate transforms it, and measurement converts the final state into classical data.</p>
+      <h3>What is a Quantum Circuit?</h3>
+      <p>Read each wire from left to right. A gate applies a transformation to the current quantum state; a multi-qubit gate acts on the joint state. If gates U₁, U₂, …, Uₖ are applied in that order, then |ψ<sub>final</sub>⟩ = Uₖ⋯U₂U₁|ψ<sub>initial</sub>⟩. Sampling repeats the measurement to estimate outcome frequencies.</p>
+      <h3>Quantum Registers and Qubits</h3>
+      <p>A register holds a chosen number of qubits. An n-qubit register starts in |0…0⟩ and has 2ⁿ computational-basis states. Each qubit is addressed by an index beginning at 0, so a two-qubit register uses q₀ and q₁.</p>
+      <h3>Creating a Quantum Register Using <code>hdqs(n)</code></h3>
+      <p>The reference creates a register with <code>hdqs(n)</code>. Here n is the number of qubits; the returned register is the object on which the documented gate and inspection methods operate.</p>
+      <h3>Gate Chaining and Circuit Execution</h3>
+      <p>Each gate returns the register, so calls can be chained from initialization through measurement. Example 46 demonstrates the complete pattern: create one qubit, apply H to qubit 0, and request 1,000 samples.</p>
+      ${example('example-46-intro', 'Example 46 · Register, gate chain, and execution', 'The code introduces hdqs(n), the gate chain, and sample(1000). The recorded counts are a single run of a fair quantum coin.', ['from sia import hdqs', 'print(hdqs(1).h(0).sample(1000))'].join('\n'), "{'0': 488, '1': 512}", [
+        'Line 1 imports the documented hdqs entry point from Sia Script.',
+        'Line 2 creates a one-qubit register with hdqs(1), applies the Hadamard gate to qubit index 0 with h(0), samples 1,000 measurements, and prints the returned outcome-count dictionary.'
+      ], 'The run recorded 488 zeros and 512 ones, close to the ideal 500/500 split. Sampling is probabilistic, so these exact counts are not guaranteed on another unseeded run.') }
+    </section>
+
+    <section class="qubit-section">
+      <h2>2. Superposition and Single-Qubit Circuits</h2>
+      <p>A single-qubit circuit can change a basis state into a superposition. The Hadamard gate maps |0⟩ to |+⟩ = (|0⟩ + |1⟩)/√2, giving equal probabilities, P(0) = P(1) = 1/2. Measurement returns one bit per shot; a collection of shots reveals the distribution.</p>
+      <h3>Creating Superposition Using the Hadamard Gate</h3>
+      <p>H creates two equal probability amplitudes from |0⟩. The circuit below shows the register, gate, and sampling step described in the reference.</p>
+      ${basicCircuitVisual('hadamard')}
+      <h3>Quantum Coin Experiment</h3>
+      <p>The Hadamard-prepared qubit behaves like a fair quantum coin when measured in the computational basis. Its individual result is 0 or 1; the distribution, rather than a single shot, expresses the balanced probabilities.</p>
+      ${example('example-46-coin', 'Example 46 · Superposition: a fair quantum coin', 'The ideal probabilities are one half for each result. The PDF records one 1,000-shot sample; the observed counts may vary between executions unless a seed is used.', ['from sia import hdqs', 'print(hdqs(1).h(0).sample(1000))'].join('\n'), "{'0': 488, '1': 512}", [
+        'Line 1 imports hdqs.',
+        'In line 2, hdqs(1) creates one qubit, h(0) applies H to qubit 0, sample(1000) performs 1,000 shots, and print displays the counts.'
+      ], 'The observed frequencies are 488/1,000 = 48.8% for 0 and 512/1,000 = 51.2% for 1. They estimate the ideal 50% / 50% distribution; they are not fixed theoretical counts.') }
+      <h3>Sampling Measurement Results</h3>
+      <p><code>sample(1000)</code> returns counts keyed by measured bit strings. For the one-qubit circuit the keys are “0” and “1”. The number passed to sample is the shot count, not the number of qubits.</p>
+    </section>
+
+    <section class="qubit-section">
+      <h2>3. Entanglement and Multi-Qubit States</h2>
+      <p>Multi-qubit state preparation uses gates on a joint register. A controlled-X (written <code>cx(control, target)</code>) flips its target when the control is 1. Acting on a superposition, it can correlate qubits and create entanglement.</p>
+      <h3>Bell State Preparation</h3>
+      <p>Starting from |00⟩, H on q₀ gives (|00⟩ + |10⟩)/√2. CX(0, 1) maps |10⟩ to |11⟩, preparing |Φ⁺⟩ = (|00⟩ + |11⟩)/√2.</p>
+      ${basicCircuitVisual('bell')}
+      ${example('example-47', 'Example 47 · Bell state: two qubits that always agree', 'An ideal measurement gives only 00 or 11. The reference output is one 1,000-shot run.', ['from sia import hdqs', 'print(hdqs(2).h(0).cx(0, 1).sample(1000))'].join('\n'), "{'00': 500, '11': 500}", [
+        'Line 1 imports hdqs.',
+        'Line 2 creates two qubits, applies H to qubit 0, applies controlled-X with control 0 and target 1, samples 1,000 runs, and prints the bit-string counts.'
+      ], 'Only 00 and 11 appear in this ideal sample, with 500 counts each. The two results agree because the state is entangled; each individual qubit is not fixed to one outcome.') }
+      <h3>GHZ State Preparation</h3>
+      <p>The GHZ state generalizes the Bell correlation to more qubits: |GHZₙ⟩ = (|00…0⟩ + |11…1⟩)/√2. A CX ladder copies the first qubit’s branch coherently across the register.</p>
+      ${basicCircuitVisual('ghz')}
+      ${example('example-48', 'Example 48 · GHZ state on five qubits', 'The documented cx_chain() builds the CX ladder after H on qubit 0.', ['from sia import hdqs', 'print(hdqs(5).h(0).cx_chain().sample(1000))'].join('\n'), "{'11111': 505, '00000': 495}", [
+        'Line 1 imports hdqs.',
+        'Line 2 creates five qubits, puts qubit 0 into superposition, applies the documented CX chain, takes 1,000 samples, and prints the counts.'
+      ], 'The sample contains only 00000 and 11111, with counts 495 and 505. This is the expected GHZ correlation; the exact ratio fluctuates between unseeded runs.') }
+      <h3>W State Preparation</h3>
+      <p>The three-qubit W state shares one excitation equally: |W₃⟩ = (|001⟩ + |010⟩ + |100⟩)/√3. Each displayed component has amplitude 1/√3 ≈ 0.577 and probability 1/3.</p>
+      ${basicCircuitVisual('wState')}
+      ${example('example-49', 'Example 49 · W state from the state library', 'The prepared-state library constructs the three-qubit W state directly.', ['from sia import hdqs', 'hdqs.prepare_state(\"w\", 3).show_state();'].join('\n'), [
+        'State                 Amplitude       Prob',
+        '|001                  0.577+0.000i    33.3%',
+        '|010                  0.577+0.000i    33.3%',
+        '|100                  0.577+0.000i    33.3%'
+      ].join('\n'), [
+        'Line 1 imports hdqs.',
+        'Line 2 calls prepare_state(\"w\", 3) to create the documented three-qubit W state, then show_state() displays its nonzero amplitudes and probabilities. The trailing semicolon is present in the reference code.'
+      ], 'The three listed basis states have equal amplitude and equal probability. The zero-amplitude basis states are omitted from this state display.') }
+      <h3>Prepared-State Library</h3>
+      <p>The reference library includes Bell, GHZ, W, and Plus states. The Bell example uses two qubits; the other examples use three. Probabilities are returned in computational-basis order.</p>
+      ${example('example-50', 'Example 50 · Prepared-state library', 'The loop prepares each named state and rounds its probability vector to three decimal places.', ['from sia import hdqs', 'for kind in [\"bell\", \"ghz\", \"w\", \"plus\"]:', '    print(kind, hdqs.prepare_state(kind, 3 if kind != \"bell\" else 2).probabilities().round(3))'].join('\n'), [
+        'bell [0.5   0.    0.    0.5]',
+        'ghz  [0.5   0.    0.    0.    0.    0.    0.    0.5]',
+        'w    [0.    0.333 0.333 0.    0.333 0.    0.    0.   ]',
+        'plus [0.125 0.125 0.125 0.125 0.125 0.125 0.125 0.125]'
+      ].join('\n'), [
+        'Line 1 imports hdqs.',
+        'Line 2 iterates over the four documented state names.',
+        'Line 3 passes two qubits for bell and three for the other states, obtains probabilities(), rounds them to three decimals, and prints each label and vector.'
+      ], 'Bell and GHZ place probability on their all-zero and all-one basis states. W places 1/3 on each one-excitation state. Plus distributes 1/8 across all eight three-qubit basis states.') }
+    </section>
+
+    <section class="qubit-section">
+      <h2>4. Quantum State Representation</h2>
+      <p>A pure n-qubit state is a vector of 2ⁿ complex amplitudes, one per computational-basis bit string. The probability of measuring basis state x is |αₓ|², and the probabilities sum to one. State inspection shows amplitudes that sampling counts alone cannot reveal.</p>
+      <h3>Basis States</h3>
+      <p>A bit string identifies a computational-basis state. The basis-state helper can prepare a requested bit string and return the probability of measuring it.</p>
+      ${example('example-51', 'Example 51 · A basis state by its bit string', 'The reference prepares |101⟩ and queries the probability of that same outcome.', ['from sia import hdqs', 'print(hdqs.prepare_state(\"basis\", bits=\"101\").probability_of(\"101\"))'].join('\n'), '1.0', [
+        'Line 1 imports hdqs.',
+        'Line 2 calls prepare_state(\"basis\", bits=\"101\") to prepare the specified three-bit basis state, then probability_of(\"101\") queries the probability of that outcome and print displays it.'
+      ], 'The result 1.0 means the prepared basis state is |101⟩ with certainty in the ideal state representation.') }
+      <h3>State Vectors and Probability Amplitudes</h3>
+      <p>For a Bell state, the amplitude vector in the ordered basis |00⟩, |01⟩, |10⟩, |11⟩ is (1/√2, 0, 0, 1/√2). The zero entries matter: those outcomes are absent from this ideal state.</p>
+      ${example('example-54', 'Example 54 · The raw state vector', 'The state property exposes the complex amplitude vector; round(3) keeps the printed values concise.', ['from sia import hdqs', 'print(hdqs(2).h(0).cx(0, 1).state.round(3))'].join('\n'), '[0.707+0.j 0.   +0.j 0.   +0.j 0.707+0.j]', [
+        'Line 1 imports hdqs.',
+        'Line 2 prepares the Bell state, reads its state vector, rounds the complex entries to three decimals, and prints the vector.'
+      ], 'The first and last entries are 0.707 ≈ 1/√2; the middle entries are zero. Squared magnitudes give probabilities 0.5, 0, 0, and 0.5.') }
+      <h3>Quantum State Probabilities</h3>
+      <p>Taking squared magnitudes converts amplitudes into probabilities. For example, |0.707|² ≈ 0.5. Probability methods report the full distribution or the probability for a selected bit string.</p>
+      ${example('example-55', 'Example 55 · Exact probabilities and one outcome', 'Two Hadamard gates prepare an equal superposition over four basis states.', ['from sia import hdqs', 'q = hdqs(2).h(0).h(1)', 'print(q.probabilities(), q.probability_of(\"11\"))'].join('\n'), '[0.25 0.25 0.25 0.25] 0.2499999999999999', [
+        'Line 1 imports hdqs.',
+        'Line 2 creates a two-qubit register and applies H to qubits 0 and 1.',
+        'Line 3 prints the four probabilities, followed by probability_of(\"11\").'
+      ], 'All four basis states have probability 0.25. The final value is the floating-point result for the probability of |11⟩, approximately one quarter.') }
+      <h3>Displaying Quantum States</h3>
+      <p><code>show_state()</code> prints the circuit label and nonzero basis states with their complex amplitudes and probabilities. Unlike <code>sample()</code>, it inspects the ideal simulated state rather than returning repeated measurement counts.</p>
+      ${basicCircuitVisual('bellProbabilities')}
+      ${example('example-52', 'Example 52 · Amplitudes, not just counts', 'This state display shows both nonzero amplitudes of the Bell state.', ['from sia import hdqs', 'hdqs(2).h(0).cx(0, 1).show_state();'].join('\n'), [
+        'H(0)·CX(0,1)',
+        'State                 Amplitude       Prob',
+        '|00                  0.707+0.000i    50.0%',
+        '|11                  0.707+0.000i    50.0%'
+      ].join('\n'), [
+        'Line 1 imports hdqs.',
+        'Line 2 creates two qubits, applies H to qubit 0 and CX from qubit 0 to qubit 1, then show_state() displays the state. The trailing semicolon matches the reference.'
+      ], 'The circuit label records H followed by CX. The displayed amplitudes are each 1/√2, giving 50% probability for |00⟩ and |11⟩ and zero for the other basis states.') }
+    </section>
+
+    <section class="qubit-section">
+      <h2>5. Phase and Quantum Interference</h2>
+      <p>Amplitudes are complex, so a state carries both magnitude and phase. A phase difference may leave immediate computational-basis probabilities unchanged, but later gates can combine amplitudes constructively or destructively. This is why amplitudes contain information that measurement counts alone do not show.</p>
+      <h3>Relative Phase</h3>
+      <p>The states |+⟩ = (|0⟩ + |1⟩)/√2 and |−⟩ = (|0⟩ − |1⟩)/√2 have the same 50/50 computational-basis probabilities but different relative phases.</p>
+      <h3>Phase Gate Example</h3>
+      <p>The S gate leaves |0⟩ unchanged and multiplies the |1⟩ amplitude by i. Applied after H, it changes the second amplitude from real to imaginary without changing its magnitude.</p>
+      ${example('example-53', 'Example 53 · Phase visible in amplitudes', 'H prepares equal amplitudes and S adds a quarter-turn phase to the |1⟩ component.', ['from sia import hdqs', 'hdqs(1).h(0).s(0).show_state();'].join('\n'), [
+        'H(0)·S(0)',
+        'State                 Amplitude       Prob',
+        '|0                  0.707+0.000i    50.0%',
+        '|1                  0.000+0.707i    50.0%'
+      ].join('\n'), [
+        'Line 1 imports hdqs.',
+        'Line 2 creates one qubit, applies H and then S to qubit 0, and displays its state.'
+      ], 'The |1⟩ amplitude is 0.707i, while both probabilities remain 50%. The phase is present in the amplitude even though the displayed probabilities are unchanged.') }
+      <h3>Hadamard Interference</h3>
+      <p>Applying H twice returns |0⟩ because H² = I. At the amplitude level, the two paths to |1⟩ cancel while those to |0⟩ add.</p>
+      <div class="state-flow math-flow"><strong>|0⟩</strong><b>→</b><span>H: (|0⟩ + |1⟩)/√2</span><b>→</b><span>H: (|0⟩ + |0⟩ + |1⟩ − |1⟩)/2</span><b>→</b><strong>|0⟩</strong></div>
+      ${example('example-56', 'Example 56 · H twice returns to |0⟩', 'The repeated Hadamard gates interfere so the ideal result is deterministic.', ['from sia import hdqs', 'print(hdqs(1).h(0).h(0).sample(100))'].join('\n'), "{'0': 100}", [
+        'Line 1 imports hdqs.',
+        'Line 2 initializes one qubit, applies H twice to qubit 0, samples 100 measurements, and prints the counts.'
+      ], 'All 100 sampled outcomes are 0. The second H reverses the first H, returning the register to |0⟩; this is interference, not a random 50/50 result.') }
+      <h3>Understanding Interference Through Measurement</h3>
+      <p>Measurement distinguishes the final result after the gates have recombined amplitudes. The S example leaves a balanced distribution at that point, while H followed by H produces only 0. Interference changes the amplitudes before measurement; it does not mean that measurement reveals an unobserved phase directly.</p>
+    </section>
+
+    <section class="qubit-section">
+      <h2>6. Sampling and Reproducibility</h2>
+      <p>Sampling runs the circuit repeatedly and records classical bit strings. For a state with several possible outcomes, counts vary naturally between unseeded executions. A seed makes the pseudorandom sampling sequence repeatable for the same circuit and shot count.</p>
+      <h3>Quantum Circuit Sampling</h3>
+      <p><code>sample(n)</code> requests n shots and returns a count for each observed bit string. Counts estimate probabilities; they are not amplitudes and need not equal their expected values exactly.</p>
+      <h3>Randomness in Measurement Outcomes</h3>
+      <p>The outputs in Examples 46–48 are recorded samples: their exact count splits are illustrative, while the supported outcome patterns follow from the prepared states. H allows 0 or 1; Bell allows 00 or 11; GHZ allows 00000 or 11111.</p>
+      <h3>Reproducible Results Using Random Seeds</h3>
+      <p>The reference sets <code>seed=42</code> in both runs. Identical circuit construction, seed, and shot count reproduce the displayed count dictionary.</p>
+      ${example('example-57', 'Example 57 · Reproducible randomness with a seed', 'Both lines create the same three-qubit superposition with the same seed and request eight samples.', ['from sia import hdqs', 'print(hdqs(3, seed=42).h(0).h(1).h(2).sample(8))', 'print(hdqs(3, seed=42).h(0).h(1).h(2).sample(8))'].join('\n'), [
+        "{'110': 4, '011': 1, '101': 1, '000': 1, '111': 1}",
+        "{'110': 4, '011': 1, '101': 1, '000': 1, '111': 1}"
+      ].join('\n'), [
+        'Line 1 imports hdqs.',
+        'Lines 2 and 3 each create a three-qubit register with seed 42, apply H to qubits 0, 1, and 2, sample eight outcomes, and print the counts.'
+      ], 'The same five bit strings and counts appear twice because the calls use the same seed, circuit, and number of shots. Without the seed, a later sample may have different counts.') }
+    </section>
+
+    <section class="qubit-section">
+      <h2>7. Circuit Representation and Plain Commands</h2>
+      <p>Sia Script can describe a circuit through a chained Python expression or through plain commands. Circuit labels make a chain readable, while the plain-command tools support text-oriented construction, conversion, and line-specific error reporting.</p>
+      <h3>Circuit Labels</h3>
+      <p><code>circuit_label()</code> returns a compact label for the operations in the register’s chain.</p>
+      ${example('example-58', 'Example 58 · Circuit label in one line', 'The label records gates in application order, including their qubit indices and rotation angle.', ['from sia import hdqs', 'print(hdqs(3).h(0).cx(0, 1).rz(2, 0.5).circuit_label())'].join('\n'), 'H(0)·CX(0,1)·Rz(2,0.5)', [
+        'Line 1 imports hdqs.',
+        'Line 2 creates three qubits, applies H to qubit 0, CX with control 0 and target 1, and RZ with angle 0.5 on qubit 2, then prints circuit_label().'
+      ], 'The output is a readable summary of the three operations in sequence: H(0), CX(0,1), and Rz(2,0.5).') }
+      <h3>Writing Circuits Using Plain Commands</h3>
+      <p><code>hdqs.plain()</code> accepts commands in a multiline string. The documented example declares two qubits and a seed, applies H and CNOT, requests measurement, and asks to display the state.</p>
+      ${example('example-59', 'Example 59 · Plain commands', 'The plain-command form is one command per line and returns a register that can be used to inspect the result.', [
+        'from sia import hdqs',
+        'q = hdqs.plain(\"\"\"',
+        'qubits 2 seed 7',
+        'h 0',
+        'cnot 0 1',
+        '# entangle',
+        'measure 1000',
+        'state',
+        '\"\"\")'
+      ].join('\n'), [
+        "{'11': 498, '00': 502}",
+        'H(0)·CX(0,1)',
+        'State                 Amplitude       Prob',
+        '|00                  0.707+0.000i    50.0%',
+        '|11                  0.707+0.000i    50.0%'
+      ].join('\n'), [
+        'Line 1 imports hdqs.',
+        'Line 2 begins a multiline plain program and stores its returned register as q.',
+        'The qubits command creates a two-qubit register and sets seed 7. The h and cnot commands prepare the Bell state; the comment labels that operation.',
+        'measure 1000 requests 1,000 measurement shots, and state requests the state display.'
+      ], 'The seeded run reports counts 498 for 11 and 502 for 00. The label shows H followed by CX, and the state display shows 50% probability for each Bell component.') }
+      <h3>Converting Plain Commands into Sia Script</h3>
+      <p><code>plain_code()</code> converts a semicolon-separated plain program into Python Sia Script. The reference also calls <code>plain()</code> on a chain to view its plain-command description.</p>
+      ${example('example-60', 'Example 60 · Plain commands and the hdqs chain', 'The first expression converts plain commands to Sia Script; the second renders a chained program as plain commands.', [
+        'from sia import hdqs',
+        'print(hdqs.plain_code(\"qubits 3; h 0; cnot 0 1; cnot 1 2; rx 2 pi/4; measure 500\"))',
+        'hdqs(2).h(0).cnot(0, 1).ry(1, hdqs.PI / 3).plain();'
+      ].join('\n'), [
+        'from sia import hdqs',
+        '',
+        'q = hdqs(3).h(0).cnot(0, 1).cnot(1, 2).rx(2, hdqs.PI/4)',
+        'print(q.sample(500))',
+        '',
+        '2 qubits, h 0, cnot 0 1, ry 1 pi/3.'
+      ].join('\n'), [
+        'Line 1 imports hdqs.',
+        'Line 2 passes a plain program string to hdqs.plain_code() and prints the generated Python Sia Script.',
+        'Line 3 builds the documented two-qubit gate chain using hdqs.PI / 3, then calls plain() to display its command form.'
+      ], 'The first output block is the generated Sia Script for three qubits, H, two CNOTs, RX, and 500 samples. The final line is the plain-command label for the separate two-qubit chain.') }
+      <h3>Error Handling and Qubit Index Validation</h3>
+      <p>The plain parser checks qubit indices against the declared register. <code>hdqs.PlainError</code> can be caught to present the offending line and a valid range instead of silently accepting an invalid qubit.</p>
+      ${example('example-61', 'Example 61 · Invalid qubit index', 'The program declares qubits 0 and 1, then deliberately addresses qubit 5 to demonstrate the parser’s error.', [
+        'from sia import hdqs',
+        'for lang in (\"en\", \"te\"):',
+        '    try:',
+        '        hdqs.plain(\"qubits 2\\nh 0\\ncnot 0 5\", lang=lang)',
+        '    except hdqs.PlainError as e:',
+        '        print(e)'
+      ].join('\n'), [
+        'line 3: qubit \"5\" does not exist: this program has qubits 0 to 1',
+        'పంక్తి 3: క్యూబిట్ "5" లేదు: ఈ ప్రోగ్రామ్‌లో క్యూబిట్‌లు 0 నుండి 1 వరకు ఉన్నాయి.'
+      ].join('\n'), [
+        'Line 1 imports hdqs.',
+        'Line 2 repeats the test in English and Telugu by iterating over the documented language codes.',
+        'Lines 3–4 call hdqs.plain() with a two-qubit program whose CNOT target index is invalid; lang selects the error language.',
+        'Line 5 catches the documented hdqs.PlainError exception, and line 6 prints its message.'
+      ], 'The parser points to line 3 of the plain program, identifies qubit 5 as missing, and states that valid indices are 0 to 1. The second line is the same error in Telugu.') }
+    </section>
+  </section>`;
+}
+
 function circuitLessonTemplate(index) {
+  if (index === 0) return basicCircuitsLessonTemplate();
   const pages = [
     ['Introduction to Quantum Circuits', 'A quantum circuit is a left-to-right plan for a quantum computation. It initializes qubits, applies gates, and measures selected qubits. A wire is a qubit, a box is a gate, and M is measurement.', 'q₀: |0⟩ ── H ── M', 'H can prepare an equal superposition from |0⟩; M then returns a classical 0 or 1. Unlike classical circuits, quantum circuits evolve quantum states until measurement. <strong>Key Takeaway:</strong> A circuit organizes qubits, gates, and measurement into an executable computation.'],
     ['Gates in Circuits', 'A gate transforms a state. Gates arranged one after another act sequentially; gates in the same column may act in parallel on independent wires. Multi-qubit gates act on a joint state.', 'q₀: |0⟩ ── H ── X ── M', 'The rule <strong>|ψ′⟩ = U|ψ⟩</strong> means that a unitary matrix U transforms input state |ψ⟩ into output state |ψ′⟩. Here H acts before X. <strong>Key Takeaway:</strong> Gate position records the order of state transformations.'],
@@ -1271,7 +1860,88 @@ function circuitExtension(index) {
   return `<div class="gate-section">${notes[index]}</div>`;
 }
 
-function loadCircuitTopic(topicIndex, updateHash = true) { state.activeChapter = 3; state.activeCircuitTopic = Math.max(0, Math.min(7, topicIndex)); state.circuitsExpanded = true; const topic = circuitTopics[state.activeCircuitTopic]; if (updateHash) window.location.hash = `circuit-${state.activeCircuitTopic + 1}`; $('#lesson-number').textContent = '04'; $('#lesson-category').textContent = 'QUANTUM CIRCUITS'; $('#lesson-title').textContent = topic.title; $('#lesson-intro').textContent = topic.intro; $('#lesson-type').textContent = chapters[3].type; const last = state.activeCircuitTopic === 7; $('#next-title').textContent = last ? chapters[4].title : circuitTopics[state.activeCircuitTopic + 1].title; $('#previous-title').textContent = state.activeCircuitTopic ? circuitTopics[state.activeCircuitTopic - 1].title : chapters[2].title; $('#footer-next-title').textContent = last ? chapters[4].title : circuitTopics[state.activeCircuitTopic + 1].title; $('#next-button small').textContent = last ? 'Next chapter' : 'Next topic'; $('#lesson-body').innerHTML = circuitLessonTemplate(state.activeCircuitTopic); $('#mobile-breadcrumb').innerHTML = `Chapter 04 <span>/</span> ${topic.title}`; $('#doc-breadcrumb').innerHTML = `Quantum Circuits <span>/</span> ${topic.title}`; renderSidebar(); renderContents(); wireInteractions(3); window.scrollTo({ top: 0, behavior: 'smooth' }); }
+function circuitStudyLessonTemplate(topic) {
+  const sections = topic.sections.map(([title, content]) => `<section class="qubit-section"><h2>${title}</h2><p>${content}</p></section>`).join('');
+  return `<section class="qubit-lesson circuit-study-lesson">${sections}</section>`;
+}
+
+function currentCircuitsAndGatesTopic() {
+  if (state.activeChapter === 2 && state.activeGatePage === 'introduction') return 1;
+  if (state.activeChapter !== 3) return -1;
+  if (state.activeCircuitStudyTopic >= 0) return state.activeCircuitStudyTopic + 2;
+  return state.activeCircuitTopic === 0 ? 0 : -1;
+}
+
+function loadCircuitsAndGatesTopic(topicIndex) {
+  const route = circuitsAndGatesTopics[topicIndex]?.route;
+  if (!route) return;
+  if (route.group === 'circuit') loadCircuitTopic(route.index);
+  else if (route.group === 'gate') loadGatePage(route.page);
+  else if (route.group === 'circuit-study') loadCircuitStudyTopic(route.index);
+}
+
+function loadCircuitTopic(topicIndex, updateHash = true) {
+  state.activeChapter = 3;
+  state.activeCircuitStudyTopic = -1;
+  state.activeCircuitTopic = Math.max(0, Math.min(circuitTopics.length - 1, topicIndex));
+  state.circuitsExpanded = true;
+  const topic = circuitTopics[state.activeCircuitTopic];
+  const isPrimaryTopic = state.activeCircuitTopic === 0;
+  const isLast = state.activeCircuitTopic === circuitTopics.length - 1;
+  if (updateHash) window.location.hash = `circuit-${state.activeCircuitTopic + 1}`;
+  $('#lesson-number').textContent = '04';
+  $('#lesson-category').textContent = 'QUANTUM CIRCUITS';
+  $('#lesson-title').textContent = topic.title;
+  $('#lesson-intro').textContent = topic.intro;
+  $('#lesson-type').textContent = chapters[3].type;
+  $('#next-number').textContent = isPrimaryTopic ? '03' : '04';
+  $('#next-title').textContent = isPrimaryTopic ? circuitsAndGatesTopics[1].title : isLast ? chapters[4].title : circuitTopics[state.activeCircuitTopic + 1].title;
+  $('#next-time').textContent = isLast ? chapters[4].time : '6 min read';
+  $('#previous-title').textContent = isPrimaryTopic ? gatePageInfo.circuits[0] : circuitTopics[state.activeCircuitTopic - 1]?.title || gatePageInfo.circuits[0];
+  $('#footer-next-title').textContent = $('#next-title').textContent;
+  $('#previous-button').disabled = false;
+  $('#next-button').disabled = false;
+  $('#next-button small').textContent = isLast ? 'Next chapter' : 'Next topic';
+  $('#lesson-body').innerHTML = circuitLessonTemplate(state.activeCircuitTopic);
+  $('#mobile-breadcrumb').innerHTML = `Chapter 04 <span>/</span> ${topic.title}`;
+  $('#doc-breadcrumb').innerHTML = `Quantum Circuits <span>/</span> ${topic.title}`;
+  renderSidebar();
+  renderContents();
+  wireInteractions(3);
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+  if (window.innerWidth <= 900) $('#sidebar').classList.remove('open');
+}
+
+function loadCircuitStudyTopic(topicIndex, updateHash = true) {
+  state.activeChapter = 3;
+  state.activeCircuitTopic = 0;
+  state.activeCircuitStudyTopic = Math.max(0, Math.min(circuitStudyTopics.length - 1, topicIndex));
+  state.circuitsExpanded = true;
+  const topic = circuitStudyTopics[state.activeCircuitStudyTopic];
+  const sequenceIndex = state.activeCircuitStudyTopic + 2;
+  if (updateHash) window.location.hash = `circuit-guide-${state.activeCircuitStudyTopic + 1}`;
+  $('#lesson-number').textContent = '04';
+  $('#lesson-category').textContent = 'QUANTUM CIRCUITS AND GATES';
+  $('#lesson-title').textContent = topic.title;
+  $('#lesson-intro').textContent = topic.intro;
+  $('#lesson-type').textContent = chapters[3].type;
+  $('#next-number').textContent = sequenceIndex === circuitsAndGatesTopics.length - 1 ? '05' : `04.${sequenceIndex + 1}`;
+  $('#next-title').textContent = sequenceIndex === circuitsAndGatesTopics.length - 1 ? chapters[4].title : circuitsAndGatesTopics[sequenceIndex + 1].title;
+  $('#next-time').textContent = sequenceIndex === circuitsAndGatesTopics.length - 1 ? chapters[4].time : '6 min read';
+  $('#previous-title').textContent = circuitsAndGatesTopics[sequenceIndex - 1].title;
+  $('#footer-next-title').textContent = $('#next-title').textContent;
+  $('#previous-button').disabled = false;
+  $('#next-button').disabled = false;
+  $('#next-button small').textContent = sequenceIndex === circuitsAndGatesTopics.length - 1 ? 'Next chapter' : 'Next topic';
+  $('#lesson-body').innerHTML = circuitStudyLessonTemplate(topic);
+  $('#mobile-breadcrumb').innerHTML = `Chapter 04 <span>/</span> ${topic.title}`;
+  $('#doc-breadcrumb').innerHTML = `Quantum Circuits and Gates <span>/</span> ${topic.title}`;
+  renderSidebar();
+  renderContents();
+  wireInteractions(3);
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+  if (window.innerWidth <= 900) $('#sidebar').classList.remove('open');
+}
 
 function algorithmLessonTemplate(topic) {
   if (topic.title === 'Deutsch Algorithm') return `<section class="qubit-lesson algorithm-lesson">
@@ -1544,7 +2214,7 @@ function loadAlgorithmTopic(topicIndex, updateHash = true) {
   $('#next-number').textContent = isLast ? '06' : `05.${state.activeAlgorithmTopic + 2}`;
   $('#next-title').textContent = isLast ? chapters[5].title : algorithmTopics[state.activeAlgorithmTopic + 1].title;
   $('#next-time').textContent = isLast ? chapters[5].time : '8 min read';
-  $('#previous-title').textContent = state.activeAlgorithmTopic ? algorithmTopics[state.activeAlgorithmTopic - 1].title : circuitTopics[circuitTopics.length - 1].title;
+  $('#previous-title').textContent = state.activeAlgorithmTopic ? algorithmTopics[state.activeAlgorithmTopic - 1].title : circuitsAndGatesTopics[circuitsAndGatesTopics.length - 1].title;
   $('#footer-next-title').textContent = isLast ? chapters[5].title : algorithmTopics[state.activeAlgorithmTopic + 1].title;
   $('#previous-button').disabled = false;
   $('#next-button').disabled = false;
@@ -1662,17 +2332,178 @@ function loadApplicationTopic(topicIndex, updateHash = true) {
 }
 
 function completeChapter(index) { if (!state.completed.includes(index)) { state.completed.push(index); localStorage.setItem('learn-quantum-progress', JSON.stringify(state.completed)); renderSidebar(); showToast('Chapter added to your progress'); } }
-function loadGatePage(page, updateHash = true) { state.activeChapter = 2; state.activeGatePage = page; state.gatesExpanded = true; if (updateHash) window.location.hash = `gate-${page}`; const position = gatePageOrder.indexOf(page); const isIntroduction = page === 'introduction'; const isCircuit = page === 'circuits'; const title = page === 'introduction' ? 'Quantum<br><i>Gates.</i>' : page === 'single' ? 'Single-Qubit<br><i>Gates.</i>' : page === 'multi' ? 'Multi-Qubit<br><i>Gates.</i>' : page === 'universal' ? 'Universal<br><i>Gates.</i>' : page === 'circuits' ? 'Gates in<br><i>circuits.</i>' : `${gatePageInfo[page][0]}`; const intro = page === 'introduction' ? chapters[2].intro : page === 'single' ? 'Single-qubit gates transform one qubit at a time.' : page === 'multi' ? 'Multi-qubit gates coordinate two or more qubits.' : gatePageInfo[page]?.[1] || ''; $('#lesson-number').textContent = '03'; $('#lesson-category').textContent = 'QUANTUM GATES'; $('#lesson-title').innerHTML = title; $('#lesson-intro').textContent = intro; $('#lesson-type').textContent = chapters[2].type; $('#next-number').textContent = position < gatePageOrder.length - 1 ? '03' : '04'; $('#next-title').textContent = position < gatePageOrder.length - 1 ? gatePageInfo[gatePageOrder[position + 1]]?.[0] || 'Quantum Gates' : chapters[3].title; $('#next-time').textContent = position < gatePageOrder.length - 1 ? '6 min read' : chapters[3].time; $('#previous-title').textContent = position > 0 ? gatePageInfo[gatePageOrder[position - 1]]?.[0] || 'Quantum Gates' : chapters[1].title; $('#footer-next-title').textContent = position < gatePageOrder.length - 1 ? gatePageInfo[gatePageOrder[position + 1]]?.[0] || 'Quantum Gates' : chapters[3].title; $('#previous-button').disabled = false; $('#next-button').disabled = false; $('#next-button small').textContent = position < gatePageOrder.length - 1 ? 'Next topic' : 'Next chapter'; $('#lesson-body').innerHTML = gatePageTemplate(page); $('#mobile-breadcrumb').innerHTML = `Chapter 03 <span>/</span> ${gatePageInfo[page]?.[0] || 'Quantum Gates'}`; $('#doc-breadcrumb').innerHTML = `Quantum Gates <span>/</span> ${gatePageInfo[page]?.[0] || 'Introduction'}`; renderSidebar(); renderContents(); wireInteractions(2); window.scrollTo({ top: 0, behavior: 'smooth' }); if (window.innerWidth <= 900) $('#sidebar').classList.remove('open'); }
-function loadChapter(index) { state.activeChapter = Math.max(0, Math.min(chapters.length - 1, index)); if (state.activeChapter === 0) return loadTopic(state.activeTopic); if (state.activeChapter === 4) return loadAlgorithmTopic(state.activeAlgorithmTopic); if (state.activeChapter === 5) return loadSimulationTopic(state.activeSimulationTopic); if (state.activeChapter === 6) return loadFrameworkTopic(state.activeFrameworkTopic); if (state.activeChapter === 7) return loadApplicationTopic(state.activeApplicationTopic); const chapter = chapters[state.activeChapter]; $('#lesson-number').textContent = String(state.activeChapter + 1).padStart(2, '0'); $('#lesson-category').textContent = chapter.title.toUpperCase(); $('#lesson-title').innerHTML = titleMarkup(state.activeChapter); $('#lesson-intro').textContent = chapter.intro; $('#lesson-type').textContent = chapter.type; $('#next-number').textContent = state.activeChapter < 7 ? String(state.activeChapter + 2).padStart(2, '0') : '—'; $('#next-title').textContent = state.activeChapter < 7 ? chapters[state.activeChapter + 1].title : 'Field guide complete'; $('#next-time').textContent = state.activeChapter < 7 ? chapters[state.activeChapter + 1].time : 'You made it'; $('#previous-title').textContent = state.activeChapter > 1 ? chapters[state.activeChapter - 1].title : 'Quantum Fundamentals'; $('#footer-next-title').textContent = state.activeChapter < 7 ? chapters[state.activeChapter + 1].title : 'Finish'; $('#previous-button').disabled = false; $('#next-button').disabled = false; $('#next-button small').textContent = 'Next chapter'; $('#lesson-body').innerHTML = lessonTemplate(state.activeChapter); $('#mobile-breadcrumb').innerHTML = `Chapter ${String(state.activeChapter + 1).padStart(2, '0')} <span>/</span> ${chapter.title}`; renderSidebar(); renderContents(); wireInteractions(state.activeChapter); window.scrollTo({ top: 0, behavior: 'smooth' }); if (window.innerWidth <= 900) $('#sidebar').classList.remove('open'); }
+function loadGatePage(page, updateHash = true) {
+  state.activeChapter = 2;
+  state.activeGatePage = page;
+  state.activeCircuitStudyTopic = -1;
+  state.gatesExpanded = true;
+  if (updateHash) window.location.hash = `gate-${page}`;
+  const position = gatePageOrder.indexOf(page);
+  const isIntroduction = page === 'introduction';
+  const title = page === 'introduction' ? 'Quantum<br><i>Gates.</i>'
+    : page === 'single' ? 'Single-Qubit<br><i>Gates.</i>'
+      : page === 'multi' ? 'Multi-Qubit<br><i>Gates.</i>'
+        : page === 'universal' ? 'Universal<br><i>Gates.</i>'
+          : page === 'circuits' ? 'Gates in<br><i>circuits.</i>'
+            : `${gatePageInfo[page][0]}`;
+  const intro = page === 'introduction' ? chapters[2].intro
+    : page === 'single' ? 'Single-qubit gates transform one qubit at a time.'
+      : page === 'multi' ? 'Multi-qubit gates coordinate two or more qubits.'
+        : gatePageInfo[page]?.[1] || '';
+  const previousTitle = isIntroduction ? 'Basic Circuits'
+    : position > 0 ? gatePageInfo[gatePageOrder[position - 1]]?.[0] || 'Quantum Gates'
+      : chapters[1].title;
+  const nextTitle = isIntroduction ? circuitStudyTopics[0].title
+    : position < gatePageOrder.length - 1 ? gatePageInfo[gatePageOrder[position + 1]]?.[0] || 'Quantum Gates'
+      : 'Basic Circuits';
+  $('#lesson-number').textContent = '03';
+  $('#lesson-category').textContent = 'QUANTUM GATES';
+  $('#lesson-title').innerHTML = title;
+  $('#lesson-intro').textContent = intro;
+  $('#lesson-type').textContent = chapters[2].type;
+  $('#next-number').textContent = isIntroduction ? '04.03' : position < gatePageOrder.length - 1 ? '03' : '04';
+  $('#next-title').textContent = nextTitle;
+  $('#next-time').textContent = position < gatePageOrder.length - 1 ? '6 min read' : chapters[3].time;
+  $('#previous-title').textContent = previousTitle;
+  $('#footer-next-title').textContent = nextTitle;
+  $('#previous-button').disabled = false;
+  $('#next-button').disabled = false;
+  $('#next-button small').textContent = 'Next topic';
+  $('#lesson-body').innerHTML = gatePageTemplate(page);
+  $('#mobile-breadcrumb').innerHTML = `Chapter 03 <span>/</span> ${gatePageInfo[page]?.[0] || 'Quantum Gates'}`;
+  $('#doc-breadcrumb').innerHTML = `Quantum Gates <span>/</span> ${gatePageInfo[page]?.[0] || 'Introduction'}`;
+  renderSidebar();
+  renderContents();
+  wireInteractions(2);
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+  if (window.innerWidth <= 900) $('#sidebar').classList.remove('open');
+}
+
+function loadChapter(index) {
+  state.activeChapter = Math.max(0, Math.min(chapters.length - 1, index));
+  if (state.activeChapter === 0) return loadTopic(state.activeTopic);
+  if (state.activeChapter === 1) return loadMathTopic(0);
+  if (state.activeChapter === 3) return loadCircuitTopic(0);
+  if (state.activeChapter === 4) return loadAlgorithmTopic(state.activeAlgorithmTopic);
+  if (state.activeChapter === 5) return loadSimulationTopic(state.activeSimulationTopic);
+  if (state.activeChapter === 6) return loadFrameworkTopic(state.activeFrameworkTopic);
+  if (state.activeChapter === 7) return loadApplicationTopic(state.activeApplicationTopic);
+  const chapter = chapters[state.activeChapter];
+  $('#lesson-number').textContent = String(state.activeChapter + 1).padStart(2, '0');
+  $('#lesson-category').textContent = chapter.title.toUpperCase();
+  $('#lesson-title').innerHTML = titleMarkup(state.activeChapter);
+  $('#lesson-intro').textContent = chapter.intro;
+  $('#lesson-type').textContent = chapter.type;
+  $('#next-number').textContent = String(state.activeChapter + 2).padStart(2, '0');
+  $('#next-title').textContent = chapters[state.activeChapter + 1].title;
+  $('#next-time').textContent = chapters[state.activeChapter + 1].time;
+  $('#previous-title').textContent = chapters[state.activeChapter - 1]?.title || 'Quantum Fundamentals';
+  $('#footer-next-title').textContent = chapters[state.activeChapter + 1].title;
+  $('#previous-button').disabled = false;
+  $('#next-button').disabled = false;
+  $('#next-button small').textContent = 'Next chapter';
+  $('#lesson-body').innerHTML = lessonTemplate(state.activeChapter);
+  $('#mobile-breadcrumb').innerHTML = `Chapter ${String(state.activeChapter + 1).padStart(2, '0')} <span>/</span> ${chapter.title}`;
+  renderSidebar();
+  renderContents();
+  wireInteractions(state.activeChapter);
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+  if (window.innerWidth <= 900) $('#sidebar').classList.remove('open');
+}
 function loadTopic(topicIndex) { state.activeChapter = 0; state.activeTopic = Math.max(0, Math.min(fundamentalsTopics.length - 1, topicIndex)); const topic = fundamentalsTopics[state.activeTopic]; $('#lesson-number').textContent = '01'; $('#lesson-category').textContent = state.activeTopic === 0 ? 'QUANTUM FUNDAMENTALS  /  INTRODUCTION' : `QUANTUM FUNDAMENTALS  /  ${topic.title.toUpperCase()}`; $('#lesson-title').innerHTML = state.activeTopic === 0 ? 'Quantum Fundamentals' : state.activeTopic === 3 ? 'Entanglement<br><i>in connection.</i>' : state.activeTopic === 4 ? 'Measurement<br><i>in observation.</i>' : topic.title; $('#lesson-intro').textContent = topic.intro; $('#lesson-type').textContent = topic.type; $('#next-number').textContent = state.activeTopic < fundamentalsTopics.length - 1 ? `01.${state.activeTopic + 2}` : '02'; $('#next-title').textContent = state.activeTopic < fundamentalsTopics.length - 1 ? fundamentalsTopics[state.activeTopic + 1].title : chapters[1].title; $('#next-time').textContent = state.activeTopic < fundamentalsTopics.length - 1 ? fundamentalsTopics[state.activeTopic + 1].time : chapters[1].time; $('#previous-title').textContent = state.activeTopic > 0 ? fundamentalsTopics[state.activeTopic - 1].title : 'Welcome'; $('#footer-next-title').textContent = state.activeTopic < fundamentalsTopics.length - 1 ? fundamentalsTopics[state.activeTopic + 1].title : chapters[1].title; $('#previous-button').disabled = state.activeTopic === 0; $('#next-button').disabled = false; $('#next-button small').textContent = 'Next'; $('#lesson-body').innerHTML = lessonTemplate(0); $('#mobile-breadcrumb').innerHTML = `Chapter 01 <span>/</span> ${topic.title}`; $('#doc-breadcrumb').innerHTML = `Quantum Fundamentals <span>/</span> ${topic.title}`; renderSidebar(); renderContents(); wireInteractions(0); window.scrollTo({ top: 0, behavior: 'smooth' }); if (window.innerWidth <= 900) $('#sidebar').classList.remove('open'); }
-function loadMathTopic(topicIndex, updateHash = true) { state.activeChapter = 1; state.activeMathTopic = Math.max(0, Math.min(mathematicsTopics.length - 1, topicIndex)); state.mathematicsExpanded = true; const topic = mathematicsTopics[state.activeMathTopic]; if (updateHash) window.location.hash = `math-${topic.slug}`; $('#lesson-number').textContent = String(state.activeMathTopic + 1).padStart(2, '0'); $('#lesson-category').textContent = 'MATHEMATICAL FOUNDATIONS'; $('#lesson-title').innerHTML = state.activeMathTopic === 0 ? 'The language behind<br><i>quantum states.</i>' : state.activeMathTopic === 1 ? 'Representing quantum states<br><i>with vectors.</i>' : topic.title; $('#lesson-intro').textContent = topic.intro; $('#lesson-type').textContent = topic.type; $('#next-number').textContent = state.activeMathTopic < mathematicsTopics.length - 1 ? String(state.activeMathTopic + 2).padStart(2, '0') : '03'; $('#next-title').textContent = state.activeMathTopic < mathematicsTopics.length - 1 ? mathematicsTopics[state.activeMathTopic + 1].title : chapters[2].title; $('#next-time').textContent = state.activeMathTopic < mathematicsTopics.length - 1 ? mathematicsTopics[state.activeMathTopic + 1].time : chapters[2].time; $('#previous-title').textContent = state.activeMathTopic > 0 ? mathematicsTopics[state.activeMathTopic - 1].title : chapters[0].title; $('#footer-next-title').textContent = state.activeMathTopic < mathematicsTopics.length - 1 ? mathematicsTopics[state.activeMathTopic + 1].title : chapters[2].title; $('#previous-button').disabled = false; $('#next-button').disabled = false; $('#next-button small').textContent = state.activeMathTopic < mathematicsTopics.length - 1 ? 'Next topic' : 'Next chapter'; $('#lesson-body').innerHTML = state.activeMathTopic === 0 ? complexNumbersLessonTemplate() : state.activeMathTopic === 1 ? vectorsLessonTemplate() : documentedMathLessonTemplate(topic); $('#mobile-breadcrumb').innerHTML = `Chapter 02 <span>/</span> ${topic.title}`; $('#doc-breadcrumb').innerHTML = `Mathematical Foundations <span>/</span> ${topic.title}`; renderSidebar(); renderContents(); wireInteractions(1); window.scrollTo({ top: 0, behavior: 'smooth' }); if (window.innerWidth <= 900) $('#sidebar').classList.remove('open'); }
+function loadMathTopic(topicIndex, updateHash = true) {
+  if (!Number.isInteger(topicIndex) || topicIndex < 0 || topicIndex >= mathematicsTopics.length) {
+    throw new RangeError(`Invalid mathematical topic index: ${topicIndex}`);
+  }
+  state.activeChapter = 1;
+  state.activeMathTopic = topicIndex;
+  state.mathematicsExpanded = true;
+  const topic = mathematicsTopics[state.activeMathTopic];
+  if (updateHash && window.location.hash !== `#math-${topic.slug}`) window.location.hash = `math-${topic.slug}`;
+  const firstTopic = state.activeMathTopic === 0;
+  const lastTopic = state.activeMathTopic === mathematicsTopics.length - 1;
+  $('#lesson-number').textContent = String(state.activeMathTopic + 1).padStart(2, '0');
+  $('#lesson-category').textContent = 'MATHEMATICAL FOUNDATIONS';
+  $('#lesson-title').textContent = topic.title;
+  $('#lesson-intro').textContent = topic.intro;
+  $('#lesson-type').textContent = topic.type;
+  $('#next-number').textContent = lastTopic ? '—' : String(state.activeMathTopic + 2).padStart(2, '0');
+  $('#next-title').textContent = lastTopic ? 'End of section' : mathematicsTopics[state.activeMathTopic + 1].title;
+  $('#next-time').textContent = lastTopic ? '' : mathematicsTopics[state.activeMathTopic + 1].time;
+  $('#previous-title').textContent = firstTopic ? 'Start of section' : mathematicsTopics[state.activeMathTopic - 1].title;
+  $('#footer-next-title').textContent = lastTopic ? 'End of section' : mathematicsTopics[state.activeMathTopic + 1].title;
+  $('#previous-button').disabled = firstTopic;
+  $('#next-button').disabled = lastTopic;
+  $('#next-button small').textContent = lastTopic ? 'End of section' : 'Next topic';
+  $('#lesson-body').innerHTML = state.activeMathTopic === 0
+    ? complexNumbersLessonTemplate(topic)
+    : state.activeMathTopic === 1
+      ? vectorsLessonTemplate(topic)
+      : documentedMathLessonTemplate(topic);
+  $('#mobile-breadcrumb').innerHTML = `Chapter 02 <span>/</span> ${topic.title}`;
+  $('#doc-breadcrumb').innerHTML = `Mathematical Foundations <span>/</span> ${topic.title}`;
+  renderSidebar();
+  renderContents();
+  wireInteractions(1);
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+  if (window.innerWidth <= 900) $('#sidebar').classList.remove('open');
+}
 function titleMarkup(index) { const titles = ['A new way to<br><i>think</i> about information.', 'The grammar of<br><i>possibility.</i>', 'Quantum<br><i>Gates.</i>', 'Turn ideas into<br><i>experiments.</i>', 'Interference with<br><i>intention.</i>', 'Borrow a quantum<br><i>microscope.</i>', 'From theory to<br><i>runnable code.</i>', 'A horizon worth<br><i>exploring.</i>']; return titles[index]; }
 function showToast(message) { const toast = $('#toast'); toast.textContent = message; toast.style.display = 'block'; setTimeout(() => toast.style.display = 'none', 2200); }
 
-$('#previous-button').addEventListener('click', () => state.activeChapter === 0 ? loadTopic(state.activeTopic - 1) : state.activeChapter === 1 ? state.activeMathTopic > 0 ? loadMathTopic(state.activeMathTopic - 1) : loadTopic(fundamentalsTopics.length - 1) : state.activeChapter === 2 ? state.activeGatePage !== 'introduction' ? loadGatePage(gatePageOrder[Math.max(0, gatePageOrder.indexOf(state.activeGatePage) - 1)]) : loadChapter(1) : state.activeChapter === 4 ? state.activeAlgorithmTopic > 0 ? loadAlgorithmTopic(state.activeAlgorithmTopic - 1) : loadCircuitTopic(circuitTopics.length - 1) : state.activeChapter === 5 ? state.activeSimulationTopic > 0 ? loadSimulationTopic(state.activeSimulationTopic - 1) : loadAlgorithmTopic(algorithmTopics.length - 1) : state.activeChapter === 6 ? state.activeFrameworkTopic > 0 ? loadFrameworkTopic(state.activeFrameworkTopic - 1) : loadSimulationTopic(simulationTopics.length - 1) : state.activeChapter === 7 ? state.activeApplicationTopic > 0 ? loadApplicationTopic(state.activeApplicationTopic - 1) : loadFrameworkTopic(frameworkTopics.length - 1) : loadChapter(state.activeChapter - 1));
-$('#next-button').addEventListener('click', () => { completeChapter(state.activeChapter); if (state.activeChapter === 0 && state.activeTopic < fundamentalsTopics.length - 1) loadTopic(state.activeTopic + 1); else if (state.activeChapter === 1 && state.activeMathTopic < mathematicsTopics.length - 1) loadMathTopic(state.activeMathTopic + 1); else if (state.activeChapter === 2 && gatePageOrder.indexOf(state.activeGatePage) < gatePageOrder.length - 1) loadGatePage(gatePageOrder[gatePageOrder.indexOf(state.activeGatePage) + 1]); else if (state.activeChapter === 4 && state.activeAlgorithmTopic < algorithmTopics.length - 1) loadAlgorithmTopic(state.activeAlgorithmTopic + 1); else if (state.activeChapter === 5 && state.activeSimulationTopic < simulationTopics.length - 1) loadSimulationTopic(state.activeSimulationTopic + 1); else if (state.activeChapter === 6 && state.activeFrameworkTopic < frameworkTopics.length - 1) loadFrameworkTopic(state.activeFrameworkTopic + 1); else if (state.activeChapter === 7 && state.activeApplicationTopic < applicationTopics.length - 1) loadApplicationTopic(state.activeApplicationTopic + 1); else loadChapter(state.activeChapter + 1); });
-$('#previous-button').addEventListener('click', (event) => { if (state.activeChapter !== 3) return; event.stopImmediatePropagation(); state.activeCircuitTopic > 0 ? loadCircuitTopic(state.activeCircuitTopic - 1) : loadGatePage(gatePageOrder[gatePageOrder.length - 1]); }, true);
-$('#next-button').addEventListener('click', (event) => { if (state.activeChapter !== 3) return; event.stopImmediatePropagation(); completeChapter(3); state.activeCircuitTopic < 7 ? loadCircuitTopic(state.activeCircuitTopic + 1) : loadChapter(4); }, true);
+$('#previous-button').addEventListener('click', () => {
+  const sequenceIndex = currentCircuitsAndGatesTopic();
+  if (sequenceIndex >= 0) {
+    if (sequenceIndex === 0) loadGatePage('circuits');
+    else loadCircuitsAndGatesTopic(sequenceIndex - 1);
+    return;
+  }
+  if (state.activeChapter === 0) return loadTopic(state.activeTopic - 1);
+  if (state.activeChapter === 1) {
+    if (state.activeMathTopic > 0) loadMathTopic(state.activeMathTopic - 1);
+    return;
+  }
+  if (state.activeChapter === 2) {
+    const position = gatePageOrder.indexOf(state.activeGatePage);
+    return position > 0 ? loadGatePage(gatePageOrder[position - 1]) : loadChapter(1);
+  }
+  if (state.activeChapter === 3) {
+    return state.activeCircuitTopic > 0 ? loadCircuitTopic(state.activeCircuitTopic - 1) : loadGatePage('circuits');
+  }
+  if (state.activeChapter === 4) {
+    return state.activeAlgorithmTopic > 0 ? loadAlgorithmTopic(state.activeAlgorithmTopic - 1) : loadCircuitsAndGatesTopic(circuitsAndGatesTopics.length - 1);
+  }
+  if (state.activeChapter === 5) return state.activeSimulationTopic > 0 ? loadSimulationTopic(state.activeSimulationTopic - 1) : loadAlgorithmTopic(algorithmTopics.length - 1);
+  if (state.activeChapter === 6) return state.activeFrameworkTopic > 0 ? loadFrameworkTopic(state.activeFrameworkTopic - 1) : loadSimulationTopic(simulationTopics.length - 1);
+  if (state.activeChapter === 7) return state.activeApplicationTopic > 0 ? loadApplicationTopic(state.activeApplicationTopic - 1) : loadFrameworkTopic(frameworkTopics.length - 1);
+  loadChapter(state.activeChapter - 1);
+});
+$('#next-button').addEventListener('click', () => {
+  completeChapter(state.activeChapter);
+  const sequenceIndex = currentCircuitsAndGatesTopic();
+  if (sequenceIndex >= 0) {
+    if (sequenceIndex < circuitsAndGatesTopics.length - 1) loadCircuitsAndGatesTopic(sequenceIndex + 1);
+    else loadAlgorithmTopic(0);
+    return;
+  }
+  if (state.activeChapter === 0) return state.activeTopic < fundamentalsTopics.length - 1 ? loadTopic(state.activeTopic + 1) : loadChapter(1);
+  if (state.activeChapter === 1) {
+    if (state.activeMathTopic < mathematicsTopics.length - 1) loadMathTopic(state.activeMathTopic + 1);
+    return;
+  }
+  if (state.activeChapter === 2) {
+    const position = gatePageOrder.indexOf(state.activeGatePage);
+    return position < gatePageOrder.length - 1 ? loadGatePage(gatePageOrder[position + 1]) : loadCircuitTopic(0);
+  }
+  if (state.activeChapter === 3) {
+    return state.activeCircuitTopic < circuitTopics.length - 1 ? loadCircuitTopic(state.activeCircuitTopic + 1) : loadAlgorithmTopic(0);
+  }
+  if (state.activeChapter === 4) return state.activeAlgorithmTopic < algorithmTopics.length - 1 ? loadAlgorithmTopic(state.activeAlgorithmTopic + 1) : loadChapter(5);
+  if (state.activeChapter === 5) return state.activeSimulationTopic < simulationTopics.length - 1 ? loadSimulationTopic(state.activeSimulationTopic + 1) : loadChapter(6);
+  if (state.activeChapter === 6) return state.activeFrameworkTopic < frameworkTopics.length - 1 ? loadFrameworkTopic(state.activeFrameworkTopic + 1) : loadChapter(7);
+  if (state.activeChapter === 7) return state.activeApplicationTopic < applicationTopics.length - 1 ? loadApplicationTopic(state.activeApplicationTopic + 1) : undefined;
+  loadChapter(state.activeChapter + 1);
+});
 $('#collapse-button').addEventListener('click', () => $('#sidebar').classList.toggle('collapsed'));
 $('#menu-button').addEventListener('click', () => $('#sidebar').classList.toggle('open'));
 document.addEventListener('keydown', (event) => { if (event.key === '/' && document.activeElement.tagName !== 'INPUT') { event.preventDefault(); $('#search-input').focus(); } });
@@ -1686,24 +2517,62 @@ function mathTopicFromHash(hash) {
   const numericRoute = /^#math-(?:[6-9]|1[0-3])$/.exec(hash);
   return numericRoute ? Number(hash.slice(6)) - 1 : -1;
 }
-const initialMathRoute = mathTopicFromHash(window.location.hash);
-const initialAlgorithmRoute = /^#algorithm-[1-9]$/.test(window.location.hash) ? Number(window.location.hash.slice(11)) - 1 : -1;
-const initialSimulationRoute = /^#simulation-[1-6]$/.test(window.location.hash) ? Number(window.location.hash.slice(12)) - 1 : -1;
-const initialFrameworkRoute = /^#framework-[1-6]$/.test(window.location.hash) ? Number(window.location.hash.slice(11)) - 1 : -1;
-const initialApplicationRoute = /^#application-[1-6]$/.test(window.location.hash) ? Number(window.location.hash.slice(13)) - 1 : -1;
-if (initialMathRoute >= 0) loadMathTopic(initialMathRoute, false);
-else if (initialAlgorithmRoute >= 0) loadAlgorithmTopic(initialAlgorithmRoute, false);
-else if (initialSimulationRoute >= 0) loadSimulationTopic(initialSimulationRoute, false);
-else if (initialFrameworkRoute >= 0) loadFrameworkTopic(initialFrameworkRoute, false);
-else if (initialApplicationRoute >= 0) loadApplicationTopic(initialApplicationRoute, false);
-else if (window.location.hash.startsWith('#gate-')) loadGatePage(window.location.hash.slice(6), false);
-else loadChapter(0);
-window.addEventListener('hashchange', () => {
-  const mathRoute = mathTopicFromHash(window.location.hash);
-  if (mathRoute >= 0) loadMathTopic(mathRoute, false);
-  if (window.location.hash.startsWith('#gate-')) loadGatePage(window.location.hash.slice(6), false);
-  if (/^#algorithm-[1-9]$/.test(window.location.hash)) loadAlgorithmTopic(Number(window.location.hash.slice(11)) - 1, false);
-  if (/^#simulation-[1-6]$/.test(window.location.hash)) loadSimulationTopic(Number(window.location.hash.slice(12)) - 1, false);
-  if (/^#framework-[1-6]$/.test(window.location.hash)) loadFrameworkTopic(Number(window.location.hash.slice(11)) - 1, false);
-  if (/^#application-[1-6]$/.test(window.location.hash)) loadApplicationTopic(Number(window.location.hash.slice(13)) - 1, false);
-});
+function loadRouteFromHash(hash) {
+  const mathIndex = mathTopicFromHash(hash);
+  if (mathIndex >= 0) {
+    if (state.activeChapter !== 1 || state.activeMathTopic !== mathIndex) loadMathTopic(mathIndex, false);
+    return true;
+  }
+  const circuitStudyRoute = /^#circuit-guide-(\d+)$/.exec(hash);
+  if (circuitStudyRoute) {
+    const index = Number(circuitStudyRoute[1]) - 1;
+    if (index < 0 || index >= circuitStudyTopics.length) return false;
+    if (state.activeChapter !== 3 || state.activeCircuitStudyTopic !== index) loadCircuitStudyTopic(index, false);
+    return true;
+  }
+  const circuitRoute = /^#circuit-(\d+)$/.exec(hash);
+  if (circuitRoute) {
+    const index = Number(circuitRoute[1]) - 1;
+    if (index < 0 || index >= circuitTopics.length) return false;
+    if (state.activeChapter !== 3 || state.activeCircuitStudyTopic >= 0 || state.activeCircuitTopic !== index) loadCircuitTopic(index, false);
+    return true;
+  }
+  if (hash.startsWith('#gate-')) {
+    const page = hash.slice(6);
+    if (!gatePageOrder.includes(page)) return false;
+    if (state.activeChapter !== 2 || state.activeGatePage !== page) loadGatePage(page, false);
+    return true;
+  }
+  const algorithmRoute = /^#algorithm-(\d+)$/.exec(hash);
+  if (algorithmRoute) {
+    const index = Number(algorithmRoute[1]) - 1;
+    if (index < 0 || index >= algorithmTopics.length) return false;
+    if (state.activeChapter !== 4 || state.activeAlgorithmTopic !== index) loadAlgorithmTopic(index, false);
+    return true;
+  }
+  const simulationRoute = /^#simulation-(\d+)$/.exec(hash);
+  if (simulationRoute) {
+    const index = Number(simulationRoute[1]) - 1;
+    if (index < 0 || index >= simulationTopics.length) return false;
+    if (state.activeChapter !== 5 || state.activeSimulationTopic !== index) loadSimulationTopic(index, false);
+    return true;
+  }
+  const frameworkRoute = /^#framework-(\d+)$/.exec(hash);
+  if (frameworkRoute) {
+    const index = Number(frameworkRoute[1]) - 1;
+    if (index < 0 || index >= frameworkTopics.length) return false;
+    if (state.activeChapter !== 6 || state.activeFrameworkTopic !== index) loadFrameworkTopic(index, false);
+    return true;
+  }
+  const applicationRoute = /^#application-(\d+)$/.exec(hash);
+  if (applicationRoute) {
+    const index = Number(applicationRoute[1]) - 1;
+    if (index < 0 || index >= applicationTopics.length) return false;
+    if (state.activeChapter !== 7 || state.activeApplicationTopic !== index) loadApplicationTopic(index, false);
+    return true;
+  }
+  return false;
+}
+
+if (!loadRouteFromHash(window.location.hash)) loadChapter(0);
+window.addEventListener('hashchange', () => loadRouteFromHash(window.location.hash));

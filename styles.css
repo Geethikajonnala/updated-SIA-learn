@@ -567,9 +567,6 @@ body { background: #fff; }
 .fundamentals-section h2,
 .fundamentals-quiz h3,
 .sidebar h2 { color: #09294f; }
-<<<<<<< HEAD
-
-
 /* Sidebar refinement: calmer hierarchy, lighter spacing, and clearer learning stages. */
 .sidebar {
   padding: 28px 22px 22px 2.2vw;
@@ -737,5 +734,204 @@ body { background: #fff; }
   margin-inline: auto;
   object-fit: contain;
 }
-=======
->>>>>>> f54b15fe3c5b866fc88047ec2ab97c08b7dbdc24
+
+.basic-circuits-lesson .qubit-section > h2 {
+  margin-bottom: 15px;
+  font-size: 23px;
+}
+.basic-circuits-lesson .qubit-section > h3 {
+  margin: 23px 0 8px;
+  color: var(--teal-dark);
+  font-size: 15px;
+}
+.basic-circuit-example {
+  min-width: 0;
+  margin: 17px 0 25px;
+  padding: 17px;
+  border: 1px solid var(--line);
+  background: rgba(255,255,255,.82);
+}
+.basic-circuit-example h4 {
+  margin: 0 0 10px;
+  color: var(--ink);
+  font: 700 14px/1.5 var(--sans);
+}
+.basic-circuit-example .basic-example-concept {
+  font-size: 12px;
+}
+.basic-circuit-example .card-label {
+  margin: 13px 0 0;
+}
+.basic-circuit-example .hdqs-code,
+.basic-circuit-example .hdqs-output {
+  margin: 7px 0 12px;
+}
+.basic-circuit-example .code-explanation {
+  margin: 6px 0 12px;
+  font-size: 11px;
+}
+.basic-circuit-example > p:last-child {
+  margin: 6px 0 0;
+  font-size: 12px;
+}
+.basic-circuits-lesson .token-keyword { color: #8d3e87; font-weight: 600; }
+.basic-circuits-lesson .token-string { color: #26734d; }
+.basic-circuits-lesson .token-comment { color: #71839d; font-style: italic; }
+.basic-circuits-lesson .token-number { color: #b15a2b; }
+.basic-circuit-visual {
+  display: grid;
+  gap: 10px;
+  width: min(100%, 560px);
+  margin: 14px 0 18px;
+  padding: 14px;
+  border: 1px solid #dce9f4;
+  background: #fbfdff;
+}
+.basic-circuit-visual svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  font: 11px var(--mono);
+}
+.basic-circuit-visual figcaption {
+  color: var(--muted);
+  font-size: 10px;
+  line-height: 1.55;
+}
+.basic-circuit-visual .circuit-wire {
+  stroke: #71839d;
+  stroke-width: 1.5;
+}
+.basic-circuit-visual .circuit-control-line,
+.basic-circuit-visual .circuit-target-mark {
+  stroke: var(--teal-dark);
+  stroke-width: 1.7;
+}
+.basic-circuit-visual .circuit-gate {
+  fill: #eefaff;
+  stroke: var(--teal);
+}
+.basic-circuit-visual .circuit-gate-label,
+.basic-circuit-visual .circuit-measure-label {
+  fill: var(--teal-dark);
+  font-weight: 700;
+}
+.basic-circuit-visual .circuit-control { fill: var(--teal-dark); }
+.basic-circuit-visual .circuit-target,
+.basic-circuit-visual .circuit-measure {
+  fill: #fff;
+  stroke: var(--teal);
+  stroke-width: 1.5;
+}
+.basic-w-state { gap: 8px; }
+.w-state-term {
+  display: grid;
+  grid-template-columns: 58px minmax(40px, 1fr);
+  gap: 5px 10px;
+  align-items: center;
+  color: var(--teal-dark);
+}
+.w-state-term strong { font: 13px var(--mono); }
+.w-state-term small {
+  grid-column: 2;
+  color: var(--muted);
+  font-size: 9px;
+}
+.w-state-bar {
+  display: block;
+  height: 9px;
+  border-radius: 99px;
+  background: #e7edf5;
+}
+.w-state-bar i {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--teal);
+}
+.basic-probability-visual > div {
+  display: grid;
+  grid-template-columns: 42px minmax(40px, 1fr) 36px;
+  gap: 9px;
+  align-items: center;
+  color: var(--teal-dark);
+  font: 10px var(--mono);
+}
+.basic-probability-visual > div > i {
+  display: block;
+  height: 9px;
+  overflow: hidden;
+  border-radius: 99px;
+  background: #e7edf5;
+}
+.basic-probability-visual > div > i > b {
+  display: block;
+  height: 100%;
+  background: var(--teal);
+}
+.basic-probability-visual > div > strong { text-align: right; }
+@media (max-width: 560px) {
+  .basic-circuits-lesson .qubit-section > h2 { font-size: 20px; }
+  .basic-circuit-example { padding: 13px; }
+  .basic-circuit-visual { padding: 10px; }
+  .basic-circuit-visual svg { font-size: 9px; }
+}
+.lesson-grid.has-topic-contents {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 180px;
+  gap: 30px;
+  align-items: start;
+}
+.lesson-grid.has-topic-contents .lesson-aside {
+  display: block;
+  min-width: 0;
+  padding-top: 34px;
+}
+.lesson-grid.has-topic-contents .contents-card {
+  display: block;
+  position: sticky;
+  top: 82px;
+  max-height: calc(100vh - 110px);
+  overflow: auto;
+}
+.lesson-grid.has-topic-contents #page-contents {
+  max-height: calc(100vh - 170px);
+  overflow: auto;
+}
+@media (max-width: 900px) {
+  .lesson-grid.has-topic-contents {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0;
+  }
+  .lesson-grid.has-topic-contents .lesson-body { grid-row: 2; }
+  .lesson-grid.has-topic-contents .lesson-aside {
+    grid-row: 1;
+    padding-top: 0;
+  }
+  .lesson-grid.has-topic-contents .next-up-card { display: none; }
+  .lesson-grid.has-topic-contents .contents-card {
+    position: static;
+    max-height: none;
+    margin-bottom: 20px;
+  }
+  .lesson-grid.has-topic-contents #page-contents {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0 12px;
+    max-height: 220px;
+  }
+}
+.lesson-grid.math-content-expanded {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0;
+}
+.lesson-grid.math-content-expanded .lesson-body {
+  width: 100%;
+  max-width: 900px;
+  margin-inline: auto;
+}
+.lesson-grid.math-content-expanded .lesson-aside {
+  display: none;
+}
