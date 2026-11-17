@@ -162,9 +162,13 @@ const gateGroups = [
 ];
 const gatePageOrder = ['introduction', 'single', 'x', 'y', 'z', 'h', 's', 't', 'rotations', 'rx', 'ry', 'rz', 'multi', 'cnot', 'cz', 'swap', 'universal', 'circuits'];
 
-const state = { activeChapter: 0, activeTopic: 0, activeMathTopic: 0, activeGatePage: 'introduction', activeCircuitTopic: 0, activeCircuitStudyTopic: -1, activeAlgorithmTopic: 0, activeSimulationTopic: 0, activeFrameworkTopic: 0, activeApplicationTopic: 0, fundamentalsExpanded: false, mathematicsExpanded: false, gatesExpanded: false, circuitsExpanded: false, algorithmsExpanded: false, simulationExpanded: false, frameworksExpanded: false, applicationsExpanded: false, singleGatesExpanded: false, rotationGatesExpanded: false, multiGatesExpanded: false, completed: JSON.parse(localStorage.getItem('learn-quantum-progress') || '[]') };
+const state = { activeChapter: 0, activeTopic: 0, activeMathTopic: 0, activeGatePage: 'introduction', activeCircuitTopic: 0, activeCircuitStudyTopic: -1, activeAlgorithmTopic: 0, activeSimulationTopic: 0, activeFrameworkTopic: 0, activeApplicationTopic: 0, activeDocTopic: -1, activeDocSectionIndex: -1, fundamentalsExpanded: false, mathematicsExpanded: false, gatesExpanded: false, circuitsExpanded: false, algorithmsExpanded: false, simulationExpanded: false, frameworksExpanded: false, applicationsExpanded: false, singleGatesExpanded: false, rotationGatesExpanded: false, multiGatesExpanded: false, completed: JSON.parse(localStorage.getItem('learn-quantum-progress') || '[]') };
 state.expandedSection = 'basics';
 state.lastRenderedSection = null;
+const siaDocNavigationTopics = siaDocSections.map((section, sectionIndex) => section.parts.map((topic) => ({
+  title: topic.title,
+  route: { group: 'sia-doc', index: siaDocTopics.findIndex((item) => item.sectionIndex === sectionIndex && item.title === topic.title) }
+})));
 const navigationSections = [
   {
     id: 'basics',
@@ -181,73 +185,44 @@ const navigationSections = [
   {
     id: 'circuits-and-gates',
     title: 'Quantum Circuits and Gates',
-    topics: circuitsAndGatesTopics
+    topics: siaDocNavigationTopics[0]
   },
   {
     id: 'sia-script-programming',
     title: 'Sia Script Programming',
-    topics: [
-      { title: 'Programs: Replay, Sweep and Undo' },
-      { title: 'Save and Restore Programs' },
-      { title: 'Checking and Research Tools' },
-      { title: 'OpenQASM 3' },
-      { title: 'Large Registers' },
-      { title: 'Simulation Modes', route: { group: 'simulation', index: 0 } }
-    ]
+    topics: siaDocNavigationTopics[1]
   },
   {
     id: 'quantum-algorithms-and-applications',
     title: 'Quantum Algorithms and Applications',
-    topics: [
-      { title: 'Quantum Algorithms', route: { group: 'algorithm', index: 0 } },
-      { title: 'Communication Protocols', route: { group: 'application', index: 0 } },
-      { title: 'Optimisation', route: { group: 'application', index: 3 } },
-      { title: 'Chemistry-Style VQE', route: { group: 'algorithm', index: 7 } },
-      { title: 'Quantum Error Correction' },
-      { title: 'CRIA' }
-    ]
+    topics: siaDocNavigationTopics[2]
   },
   {
     id: 'visualization-and-research-tools',
     title: 'Visualization and Research Tools',
-    topics: [
-      { title: 'Visuals for Registers' },
-      { title: 'Algorithm Visuals and Live Players' },
-      { title: 'Publication Figures' },
-      { title: 'LaTeX and Research Bundles' },
-      { title: 'Frame Sequences' }
-    ]
+    topics: siaDocNavigationTopics[3]
   },
   {
     id: '3d-models-and-printing',
     title: '3D Models and Printing',
-    topics: [
-      { title: '3D Models' },
-      { title: '3D Printing' }
-    ]
+    topics: siaDocNavigationTopics[4]
   },
   {
     id: 'teaching-and-interactive-learning',
     title: 'Teaching and Interactive Learning',
-    topics: [
-      { title: 'Lessons and Worksheets' },
-      { title: 'The Browser Playground' }
-    ]
+    topics: siaDocNavigationTopics[5]
   },
   {
     id: 'quantum-machine-learning-and-integration',
     title: 'Quantum Machine Learning and Integration',
-    topics: [
-      { title: 'Machine Learning with PyTorch', route: { group: 'application', index: 2 } },
-      { title: 'Interoperability and Utilities', route: { group: 'framework', index: 4 } }
-    ]
+    topics: siaDocNavigationTopics[6]
   }
 ];
 const $ = (selector) => document.querySelector(selector);
 const chapterList = $('#chapter-list');
 
 function renderSidebar() {
-  const activeSectionId = state.activeChapter === 0 ? 'basics'
+  const activeSectionId = state.activeDocSectionIndex >= 0 ? navigationSections[state.activeDocSectionIndex + 2]?.id : state.activeChapter === 0 ? 'basics'
     : state.activeChapter === 1 ? 'mathematical-foundations'
       : state.activeChapter === 2 || state.activeChapter === 3 ? 'circuits-and-gates'
         : state.activeChapter === 4 ? 'quantum-algorithms-and-applications'
@@ -270,6 +245,7 @@ function renderSidebar() {
     if (route.group === 'simulation') return state.activeChapter === 5 && state.activeSimulationTopic === route.index;
     if (route.group === 'framework') return state.activeChapter === 6 && state.activeFrameworkTopic === route.index;
     if (route.group === 'application') return state.activeChapter === 7 && state.activeApplicationTopic === route.index;
+    if (route.group === 'sia-doc') return state.activeChapter === siaDocTopics[route.index]?.chapter && state.activeDocTopic === route.index;
     return false;
   };
   const topicsMarkup = (topics) => topics.map((topic) => {
@@ -307,8 +283,8 @@ function renderSidebar() {
     event.stopPropagation();
     const index = Number(button.dataset.navIndex);
     switch (button.dataset.navRoute) {
-      case 'fundamentals': loadTopic(index); break;
-      case 'math': loadMathTopic(index); break;
+      case 'fundamentals': state.activeDocTopic = -1; state.activeDocSectionIndex = -1; loadTopic(index); break;
+      case 'math': state.activeDocTopic = -1; state.activeDocSectionIndex = -1; loadMathTopic(index); break;
       case 'gate': loadGatePage(button.dataset.navPage); break;
       case 'circuit': loadCircuitTopic(index); break;
       case 'circuit-study': loadCircuitStudyTopic(index); break;
@@ -316,6 +292,7 @@ function renderSidebar() {
       case 'simulation': loadSimulationTopic(index); break;
       case 'framework': loadFrameworkTopic(index); break;
       case 'application': loadApplicationTopic(index); break;
+      case 'sia-doc': loadSiaDocTopic(index); break;
     }
   }));
   const percent = Math.round((state.completed.length / chapters.length) * 100);
@@ -689,7 +666,6 @@ function complexNumbersLessonTemplate(topic) {
       <p>Complex amplitudes encode quantum-state probabilities and relative phase. Quantum gates change those amplitudes; interference then uses phase differences to reinforce or cancel possible outcomes. This is why a circuit must track complex amplitudes rather than probabilities alone.</p>
     </section>
     ${examples.map((example, index) => `<section class="qubit-section complex-example">
-      <p class="complex-example-label">Example ${index + 1}</p>
       <h2>${example.title}</h2>
       <div class="complex-example-step"><h3>Concept</h3><p>${example.concept}</p></div>
       <div class="complex-example-step"><h3>Sia Script Code</h3><pre class="hdqs-code"><code>${example.code}</code></pre></div>
@@ -783,7 +759,6 @@ function vectorsLessonTemplate(topic) {
       <p>State vectors store quantum amplitudes; inner products give overlaps and measurement probabilities; norms verify normalization; and projections describe components selected by a measurement or basis change. Orthogonal vectors represent perfectly distinguishable outcomes.</p>
     </section>
     ${examples.map((example) => `<section class="qubit-section vectors-example">
-      <p class="vectors-example-label">Example ${example.number}</p>
       <h2>${example.title}</h2>
       <div class="vectors-example-step"><h3>Sia Script Code</h3><pre class="hdqs-code"><code>${example.code}</code></pre></div>
       <div class="vectors-example-step"><h3>Code Output</h3><pre class="hdqs-output"><code>${example.output.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</code></pre>${example.image ? `<figure class="vectors-output-figure"><img src="${example.image}" alt="${example.imageAlt}"><figcaption>${example.imageCaption}</figcaption></figure>` : ''}</div>
@@ -844,7 +819,6 @@ function tensorLessonTemplate() {
       <p>For two qubits those basis states are <strong>|00⟩</strong>, <strong>|01⟩</strong>, <strong>|10⟩</strong> and <strong>|11⟩</strong>.</p>
     </section>
     <section class="qubit-section complex-example">
-      <p class="complex-example-label">Example 9</p>
       <h2>Tensor products build multi-qubit states</h2>
       <div class="complex-example-step">
         <h3>Sia Script Code</h3>
@@ -1255,7 +1229,6 @@ function renderStructuredMathLesson(topic, lesson, guide, lessonClass) {
       ? `<ol class="vectors-code-explanation">${example.codeExplanation.map((line) => `<li>${line}</li>`).join('')}</ol>`
       : `<p>${example.codeExplanation}</p>`;
     return `<section class="qubit-section complex-example">
-      <p class="complex-example-label">Example ${example.number}</p>
       <h2>${escapeText(example.title)}</h2>
       ${example.concept ? `<div class="complex-example-step"><h3>Concept</h3><p>${example.concept}</p></div>` : ''}
       <div class="complex-example-step"><h3>Sia Script Code</h3><pre class="hdqs-code"><code>${escapeText(example.code)}</code></pre></div>
@@ -1333,35 +1306,7 @@ function topicTemplate(topicIndex) {
 }
 
 function renderContents() {
-  const lessonGrid = $('.lesson-grid');
-  const isMathLesson = state.activeChapter === 1;
-  lessonGrid.classList.toggle('has-topic-contents', state.activeChapter >= 2 && state.activeChapter <= 3);
-  lessonGrid.classList.toggle('math-content-expanded', isMathLesson);
-  $('.lesson-aside').hidden = isMathLesson;
-  $('.contents-card').hidden = isMathLesson;
-  const pageContents = $('#page-contents');
-  if (isMathLesson) {
-    pageContents.replaceChildren();
-    return;
-  }
-  const headings = [...$('#lesson-body').querySelectorAll('h2, h3')];
-  pageContents.innerHTML = headings.map((heading, index) => {
-    const id = `section-${index}`;
-    heading.id = id;
-    return `<button type="button" data-target="${id}">${heading.textContent}</button>`;
-  }).join('');
-  pageContents.querySelectorAll('button').forEach((button) => button.addEventListener('click', () => {
-    const target = document.getElementById(button.dataset.target);
-    if (target) {
-      const topbar = $('.topbar');
-      const offset = topbar ? topbar.getBoundingClientRect().height + 16 : 16;
-      const scrollRoot = document.scrollingElement || document.documentElement;
-      scrollRoot.scrollTo({
-        top: target.getBoundingClientRect().top + scrollRoot.scrollTop - offset,
-        behavior: 'instant'
-      });
-    }
-  }));
+  // Page contents are presented in the lesson body; the side panel was removed.
 }
 
 function wireInteractions(index) {
@@ -1492,8 +1437,9 @@ function highlightBasicCircuitCode(source) {
 }
 
 function basicCircuitExample(id, title, concept, code, output, codeExplanation, outputExplanation) {
+  const heading = title.replace(/^Example\s+\d+\s*[·.:—-]\s*/i, '');
   return `<div class="basic-circuit-example">
-    <h4 id="${id}">${title}</h4>
+    <h4 id="${id}">${heading}</h4>
     <p class="basic-example-concept"><strong>Concept:</strong> ${concept}</p>
     <p class="card-label">Sia Script Code · Python</p>
     <pre class="hdqs-code"><code class="language-python">${highlightBasicCircuitCode(code)}</code></pre>
@@ -1587,7 +1533,7 @@ function basicCircuitsLessonTemplate() {
   const example = basicCircuitExample;
   return `<section class="gates-lesson math-lesson circuit-lesson basic-circuits-lesson">
     <section class="qubit-section">
-      <h2>1. Introduction to Quantum Circuits</h2>
+      <h2>Introduction to Quantum Circuits</h2>
       <p>A quantum circuit is an ordered program for preparing a register, applying gates, and sampling or inspecting its resulting state. A circuit makes the computation explicit: the register is the system, each chained gate transforms it, and measurement converts the final state into classical data.</p>
       <h3>What is a Quantum Circuit?</h3>
       <p>Read each wire from left to right. A gate applies a transformation to the current quantum state; a multi-qubit gate acts on the joint state. If gates U₁, U₂, …, Uₖ are applied in that order, then |ψ<sub>final</sub>⟩ = Uₖ⋯U₂U₁|ψ<sub>initial</sub>⟩. Sampling repeats the measurement to estimate outcome frequencies.</p>
@@ -1604,7 +1550,7 @@ function basicCircuitsLessonTemplate() {
     </section>
 
     <section class="qubit-section">
-      <h2>2. Superposition and Single-Qubit Circuits</h2>
+      <h2>Superposition and Single-Qubit Circuits</h2>
       <p>A single-qubit circuit can change a basis state into a superposition. The Hadamard gate maps |0⟩ to |+⟩ = (|0⟩ + |1⟩)/√2, giving equal probabilities, P(0) = P(1) = 1/2. Measurement returns one bit per shot; a collection of shots reveals the distribution.</p>
       <h3>Creating Superposition Using the Hadamard Gate</h3>
       <p>H creates two equal probability amplitudes from |0⟩. The circuit below shows the register, gate, and sampling step described in the reference.</p>
@@ -1620,7 +1566,7 @@ function basicCircuitsLessonTemplate() {
     </section>
 
     <section class="qubit-section">
-      <h2>3. Entanglement and Multi-Qubit States</h2>
+      <h2>Entanglement and Multi-Qubit States</h2>
       <p>Multi-qubit state preparation uses gates on a joint register. A controlled-X (written <code>cx(control, target)</code>) flips its target when the control is 1. Acting on a superposition, it can correlate qubits and create entanglement.</p>
       <h3>Bell State Preparation</h3>
       <p>Starting from |00⟩, H on q₀ gives (|00⟩ + |10⟩)/√2. CX(0, 1) maps |10⟩ to |11⟩, preparing |Φ⁺⟩ = (|00⟩ + |11⟩)/√2.</p>
@@ -1663,7 +1609,7 @@ function basicCircuitsLessonTemplate() {
     </section>
 
     <section class="qubit-section">
-      <h2>4. Quantum State Representation</h2>
+      <h2>Quantum State Representation</h2>
       <p>A pure n-qubit state is a vector of 2ⁿ complex amplitudes, one per computational-basis bit string. The probability of measuring basis state x is |αₓ|², and the probabilities sum to one. State inspection shows amplitudes that sampling counts alone cannot reveal.</p>
       <h3>Basis States</h3>
       <p>A bit string identifies a computational-basis state. The basis-state helper can prepare a requested bit string and return the probability of measuring it.</p>
@@ -1699,7 +1645,7 @@ function basicCircuitsLessonTemplate() {
     </section>
 
     <section class="qubit-section">
-      <h2>5. Phase and Quantum Interference</h2>
+      <h2>Phase and Quantum Interference</h2>
       <p>Amplitudes are complex, so a state carries both magnitude and phase. A phase difference may leave immediate computational-basis probabilities unchanged, but later gates can combine amplitudes constructively or destructively. This is why amplitudes contain information that measurement counts alone do not show.</p>
       <h3>Relative Phase</h3>
       <p>The states |+⟩ = (|0⟩ + |1⟩)/√2 and |−⟩ = (|0⟩ − |1⟩)/√2 have the same 50/50 computational-basis probabilities but different relative phases.</p>
@@ -1726,7 +1672,7 @@ function basicCircuitsLessonTemplate() {
     </section>
 
     <section class="qubit-section">
-      <h2>6. Sampling and Reproducibility</h2>
+      <h2>Sampling and Reproducibility</h2>
       <p>Sampling runs the circuit repeatedly and records classical bit strings. For a state with several possible outcomes, counts vary naturally between unseeded executions. A seed makes the pseudorandom sampling sequence repeatable for the same circuit and shot count.</p>
       <h3>Quantum Circuit Sampling</h3>
       <p><code>sample(n)</code> requests n shots and returns a count for each observed bit string. Counts estimate probabilities; they are not amplitudes and need not equal their expected values exactly.</p>
@@ -1744,7 +1690,7 @@ function basicCircuitsLessonTemplate() {
     </section>
 
     <section class="qubit-section">
-      <h2>7. Circuit Representation and Plain Commands</h2>
+      <h2>Circuit Representation and Plain Commands</h2>
       <p>Sia Script can describe a circuit through a chained Python expression or through plain commands. Circuit labels make a chain readable, while the plain-command tools support text-oriented construction, conversion, and line-specific error reporting.</p>
       <h3>Circuit Labels</h3>
       <p><code>circuit_label()</code> returns a compact label for the operations in the register’s chain.</p>
@@ -1841,7 +1787,7 @@ function circuitSupplement(index) {
     '<h3>Composition</h3><p>A circuit is a composition of operations. If U₁ is followed by U₂, the overall transformation is U₂U₁, so the rightmost operation in the algebra acts first. Keeping this convention in mind prevents a common mistake when comparing diagrams with matrices.</p><h3>Controlled and inverse operations</h3><p>Controlled gates apply an operation only on selected components of a joint state. Inverse gates undo a previous transformation: H⁻¹ = H, X⁻¹ = X, and S⁻¹ is written S†. A circuit followed by its exact inverse returns the original ideal state.</p><h3>Compilation before execution</h3><p>A compiler may rewrite a circuit using the gates and qubit connections available on a device. This translation, often called transpilation, should preserve the intended result while aiming for fewer gates, lower depth, or a hardware-compatible layout.</p>',
     '<h3>From amplitudes to outcomes</h3><p>For |ψ⟩ = α|0⟩ + β|1⟩, measurement returns 0 with probability |α|² and 1 with probability |β|². After a computational-basis measurement, the qubit is found in the observed basis state, so measurement is not merely a passive display of a hidden value.</p><h3>Shots and counts</h3><p>A <strong>shot</strong> is one independent execution. If an H gate prepares an ideal equal superposition, 1,000 shots might yield {0: 493, 1: 507}. The counts estimate the distribution; they will not usually be exactly equal because sampling has natural variation.</p><h3>Reading multi-qubit results</h3><p>A measured bit string represents all measured qubits in an order chosen by the tool. Check that ordering before interpreting results. For the Bell circuit, the useful pattern is that only 00 and 11 occur ideally; 01 and 10 signal noise, a setup error, or an incorrect circuit.</p>',
     '<h3>Choose the right kind of simulation</h3><p>A statevector simulator keeps the complete ideal quantum state and is useful for checking amplitudes before measurement. A shot-based simulator instead returns sampled counts, matching the form of an experiment. Both are valuable, but they answer slightly different questions.</p><h3>Execution workflow</h3><p>First define qubits and gates. Next choose measurements and a number of shots. Then execute and inspect either the state, probabilities, or counts. Finally compare the observed pattern with the circuit prediction rather than expecting every individual shot to match one chosen outcome.</p><h3>Why hardware differs</h3><p>Real processors have imperfect gates, readout errors, and limited qubit connectivity. Noisy simulation can model these effects before hardware runs. When results disagree with an ideal simulation, inspect depth, two-qubit gate count, and whether the device required extra routing operations.</p>',
-    '<h3>Example 1: deterministic bit flip</h3><p>Start with |0⟩, apply X, then measure. X maps |0⟩ to |1⟩, so an ideal result is always 1. This is a good first test because both the state change and the expected counts are simple.</p><h3>Example 2: phase becomes visible</h3><p>Consider |0⟩ → H → Z → H → M. H first creates |+⟩; Z changes it to |−⟩; the final H maps |−⟩ to |1⟩. Z alone does not change computational-basis probabilities, but the second H converts its phase change into a definite bit result.</p><h3>Example 3: Bell-state check</h3><p>Apply H to q₀ and CNOT from q₀ to q₁, then measure both qubits. Repeat the circuit many times. Ideal counts contain 00 and 11 in roughly equal amounts, demonstrating correlation without claiming that either individual measurement was predetermined.</p><h3>From examples to algorithms</h3><p>These patterns recur in larger algorithms: prepare a state, apply transformations that control interference, and measure a result. Deutsch, Bernstein–Vazirani, and Grover-style circuits add more structure, but they are built from the same small operations.</p>'
+    '<h3>Deterministic bit flip</h3><p>Start with |0⟩, apply X, then measure. X maps |0⟩ to |1⟩, so an ideal result is always 1. This is a good first test because both the state change and the expected counts are simple.</p><h3>Phase becomes visible</h3><p>Consider |0⟩ → H → Z → H → M. H first creates |+⟩; Z changes it to |−⟩; the final H maps |−⟩ to |1⟩. Z alone does not change computational-basis probabilities, but the second H converts its phase change into a definite bit result.</p><h3>Bell-state check</h3><p>Apply H to q₀ and CNOT from q₀ to q₁, then measure both qubits. Repeat the circuit many times. Ideal counts contain 00 and 11 in roughly equal amounts, demonstrating correlation without claiming that either individual measurement was predetermined.</p><h3>From examples to algorithms</h3><p>These patterns recur in larger algorithms: prepare a state, apply transformations that control interference, and measure a result. Deutsch, Bernstein–Vazirani, and Grover-style circuits add more structure, but they are built from the same small operations.</p>'
   ];
   return `<div class="gate-section">${notes[index]}</div>`;
 }
@@ -2331,6 +2277,72 @@ function loadApplicationTopic(topicIndex, updateHash = true) {
   if (window.innerWidth <= 900) $('#sidebar').classList.remove('open');
 }
 
+function escapeLessonText(text) {
+  return String(text).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+function formatReferenceText(text) {
+  return escapeLessonText(text || '')
+    .replace(/`([^`]+)`/g, '<code>$1</code>')
+    .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+    .replace(/\n/g, '<br>');
+}
+
+function siaDocLessonMarkup(topic) {
+  const partIntros = topic.notebookParts.map((part) => {
+    const intro = part.intro.replace(/^## Part [^\n]+\n+/, '');
+    return `<p>${formatReferenceText(intro)}</p>`;
+  }).join('');
+  const examples = topic.examples.map((example) => `<section class="qubit-section notebook-example" id="notebook-example-${example.number}">
+    <h3>${formatReferenceText(example.title)}</h3>
+    ${example.description ? `<p class="notebook-example-note">${formatReferenceText(example.description)}</p>` : ''}
+    ${example.pdfContext ? `<p class="notebook-explanation"><strong>PDF concept.</strong> ${formatReferenceText(example.pdfContext)}</p>` : ''}
+    <h4>Sia Script</h4>
+    <pre class="hdqs-code"><code>${escapeLessonText(example.code)}</code></pre>
+    ${example.codeExplanation ? `<p class="notebook-explanation"><strong>Code explanation.</strong> ${formatReferenceText(example.codeExplanation)}</p>` : ''}
+    ${example.output ? `<h4>Recorded notebook output</h4><pre class="hdqs-output"><code>${escapeLessonText(example.output)}</code></pre>` : ''}
+    ${example.assets.map((asset) => `<figure class="notebook-output-figure"><img src="${escapeLessonText(asset)}" alt="Saved notebook output: ${escapeLessonText(example.title)}"><figcaption>Saved notebook output: ${formatReferenceText(example.title)}.</figcaption></figure>`).join('')}
+    ${example.outputExplanation ? `<p class="notebook-explanation"><strong>Output explanation.</strong> ${formatReferenceText(example.outputExplanation)}</p>` : ''}
+  </section>`).join('');
+  return `<section class="qubit-lesson sia-reference-lesson">
+    <div class="qubit-section"><h2>Concepts and notation</h2><p>${formatReferenceText(topic.theory)}</p>${partIntros}</div>
+    <div class="qubit-section"><h2>Documented Sia Script examples</h2>${examples}</div>
+  </section>`;
+}
+
+function loadSiaDocTopic(topicIndex, updateHash = true) {
+  const topic = siaDocTopics[topicIndex];
+  if (!topic) return;
+  state.activeDocTopic = topicIndex;
+  state.activeDocSectionIndex = topic.sectionIndex;
+  state.activeChapter = topic.chapter;
+  state.expandedSection = navigationSections[topic.sectionIndex + 2].id;
+  if (updateHash) window.location.hash = `sia-doc-${topicIndex + 1}`;
+  const previous = siaDocTopics[topicIndex - 1];
+  const next = siaDocTopics[topicIndex + 1];
+  $('#lesson-number').textContent = String(topic.chapter + 1).padStart(2, '0');
+  $('#lesson-category').textContent = topic.category;
+  $('#lesson-title').textContent = topic.title;
+  $('#lesson-intro').textContent = topic.intro;
+  $('#lesson-type').textContent = 'Sia Script · documented examples';
+  $('#next-number').textContent = next ? String(next.chapter + 1).padStart(2, '0') : '—';
+  $('#next-title').textContent = next ? next.title : 'Curriculum complete';
+  $('#next-time').textContent = next ? 'Reference lesson' : 'You made it';
+  $('#previous-title').textContent = previous ? previous.title : mathematicsTopics[mathematicsTopics.length - 1].title;
+  $('#footer-next-title').textContent = next ? next.title : 'Finish';
+  $('#previous-button').disabled = false;
+  $('#next-button').disabled = !next;
+  $('#next-button small').textContent = 'Next topic';
+  $('#lesson-body').innerHTML = siaDocLessonMarkup(topic);
+  $('#mobile-breadcrumb').innerHTML = `Chapter ${String(topic.chapter + 1).padStart(2, '0')} <span>/</span> ${topic.title}`;
+  $('#doc-breadcrumb').innerHTML = `${navigationSections[topic.sectionIndex + 2].title} <span>/</span> ${topic.title}`;
+  renderSidebar();
+  renderContents();
+  wireInteractions(topic.chapter);
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+  if (window.innerWidth <= 900) $('#sidebar').classList.remove('open');
+}
+
 function completeChapter(index) { if (!state.completed.includes(index)) { state.completed.push(index); localStorage.setItem('learn-quantum-progress', JSON.stringify(state.completed)); renderSidebar(); showToast('Chapter added to your progress'); } }
 function loadGatePage(page, updateHash = true) {
   state.activeChapter = 2;
@@ -2380,6 +2392,8 @@ function loadGatePage(page, updateHash = true) {
 }
 
 function loadChapter(index) {
+  state.activeDocTopic = -1;
+  state.activeDocSectionIndex = -1;
   state.activeChapter = Math.max(0, Math.min(chapters.length - 1, index));
   if (state.activeChapter === 0) return loadTopic(state.activeTopic);
   if (state.activeChapter === 1) return loadMathTopic(0);
@@ -2410,7 +2424,7 @@ function loadChapter(index) {
   window.scrollTo({ top: 0, behavior: 'smooth' });
   if (window.innerWidth <= 900) $('#sidebar').classList.remove('open');
 }
-function loadTopic(topicIndex) { state.activeChapter = 0; state.activeTopic = Math.max(0, Math.min(fundamentalsTopics.length - 1, topicIndex)); const topic = fundamentalsTopics[state.activeTopic]; $('#lesson-number').textContent = '01'; $('#lesson-category').textContent = state.activeTopic === 0 ? 'QUANTUM FUNDAMENTALS  /  INTRODUCTION' : `QUANTUM FUNDAMENTALS  /  ${topic.title.toUpperCase()}`; $('#lesson-title').innerHTML = state.activeTopic === 0 ? 'Quantum Fundamentals' : state.activeTopic === 3 ? 'Entanglement<br><i>in connection.</i>' : state.activeTopic === 4 ? 'Measurement<br><i>in observation.</i>' : topic.title; $('#lesson-intro').textContent = topic.intro; $('#lesson-type').textContent = topic.type; $('#next-number').textContent = state.activeTopic < fundamentalsTopics.length - 1 ? `01.${state.activeTopic + 2}` : '02'; $('#next-title').textContent = state.activeTopic < fundamentalsTopics.length - 1 ? fundamentalsTopics[state.activeTopic + 1].title : chapters[1].title; $('#next-time').textContent = state.activeTopic < fundamentalsTopics.length - 1 ? fundamentalsTopics[state.activeTopic + 1].time : chapters[1].time; $('#previous-title').textContent = state.activeTopic > 0 ? fundamentalsTopics[state.activeTopic - 1].title : 'Welcome'; $('#footer-next-title').textContent = state.activeTopic < fundamentalsTopics.length - 1 ? fundamentalsTopics[state.activeTopic + 1].title : chapters[1].title; $('#previous-button').disabled = state.activeTopic === 0; $('#next-button').disabled = false; $('#next-button small').textContent = 'Next'; $('#lesson-body').innerHTML = lessonTemplate(0); $('#mobile-breadcrumb').innerHTML = `Chapter 01 <span>/</span> ${topic.title}`; $('#doc-breadcrumb').innerHTML = `Quantum Fundamentals <span>/</span> ${topic.title}`; renderSidebar(); renderContents(); wireInteractions(0); window.scrollTo({ top: 0, behavior: 'smooth' }); if (window.innerWidth <= 900) $('#sidebar').classList.remove('open'); }
+function loadTopic(topicIndex, updateHash = true) { state.activeChapter = 0; state.activeTopic = Math.max(0, Math.min(fundamentalsTopics.length - 1, topicIndex)); const topic = fundamentalsTopics[state.activeTopic]; if (updateHash && window.location.hash !== `#basics-${state.activeTopic + 1}`) window.location.hash = `basics-${state.activeTopic + 1}`; $('#lesson-number').textContent = '01'; $('#lesson-category').textContent = state.activeTopic === 0 ? 'QUANTUM FUNDAMENTALS  /  INTRODUCTION' : `QUANTUM FUNDAMENTALS  /  ${topic.title.toUpperCase()}`; $('#lesson-title').innerHTML = state.activeTopic === 0 ? 'Quantum Fundamentals' : state.activeTopic === 3 ? 'Entanglement<br><i>in connection.</i>' : state.activeTopic === 4 ? 'Measurement<br><i>in observation.</i>' : topic.title; $('#lesson-intro').textContent = topic.intro; $('#lesson-type').textContent = topic.type; $('#next-number').textContent = state.activeTopic < fundamentalsTopics.length - 1 ? `01.${state.activeTopic + 2}` : '02'; $('#next-title').textContent = state.activeTopic < fundamentalsTopics.length - 1 ? fundamentalsTopics[state.activeTopic + 1].title : chapters[1].title; $('#next-time').textContent = state.activeTopic < fundamentalsTopics.length - 1 ? fundamentalsTopics[state.activeTopic + 1].time : chapters[1].time; $('#previous-title').textContent = state.activeTopic > 0 ? fundamentalsTopics[state.activeTopic - 1].title : 'Welcome'; $('#footer-next-title').textContent = state.activeTopic < fundamentalsTopics.length - 1 ? fundamentalsTopics[state.activeTopic + 1].title : chapters[1].title; $('#previous-button').disabled = state.activeTopic === 0; $('#next-button').disabled = false; $('#next-button small').textContent = 'Next'; $('#lesson-body').innerHTML = lessonTemplate(0); $('#mobile-breadcrumb').innerHTML = `Chapter 01 <span>/</span> ${topic.title}`; $('#doc-breadcrumb').innerHTML = `Quantum Fundamentals <span>/</span> ${topic.title}`; renderSidebar(); renderContents(); wireInteractions(0); window.scrollTo({ top: 0, behavior: 'smooth' }); if (window.innerWidth <= 900) $('#sidebar').classList.remove('open'); }
 function loadMathTopic(topicIndex, updateHash = true) {
   if (!Number.isInteger(topicIndex) || topicIndex < 0 || topicIndex >= mathematicsTopics.length) {
     throw new RangeError(`Invalid mathematical topic index: ${topicIndex}`);
@@ -2427,14 +2441,14 @@ function loadMathTopic(topicIndex, updateHash = true) {
   $('#lesson-title').textContent = topic.title;
   $('#lesson-intro').textContent = topic.intro;
   $('#lesson-type').textContent = topic.type;
-  $('#next-number').textContent = lastTopic ? '—' : String(state.activeMathTopic + 2).padStart(2, '0');
-  $('#next-title').textContent = lastTopic ? 'End of section' : mathematicsTopics[state.activeMathTopic + 1].title;
-  $('#next-time').textContent = lastTopic ? '' : mathematicsTopics[state.activeMathTopic + 1].time;
+  $('#next-number').textContent = lastTopic ? String(siaDocTopics[0].chapter + 1).padStart(2, '0') : String(state.activeMathTopic + 2).padStart(2, '0');
+  $('#next-title').textContent = lastTopic ? siaDocTopics[0].title : mathematicsTopics[state.activeMathTopic + 1].title;
+  $('#next-time').textContent = lastTopic ? 'Reference lesson' : mathematicsTopics[state.activeMathTopic + 1].time;
   $('#previous-title').textContent = firstTopic ? 'Start of section' : mathematicsTopics[state.activeMathTopic - 1].title;
-  $('#footer-next-title').textContent = lastTopic ? 'End of section' : mathematicsTopics[state.activeMathTopic + 1].title;
+  $('#footer-next-title').textContent = lastTopic ? siaDocTopics[0].title : mathematicsTopics[state.activeMathTopic + 1].title;
   $('#previous-button').disabled = firstTopic;
-  $('#next-button').disabled = lastTopic;
-  $('#next-button small').textContent = lastTopic ? 'End of section' : 'Next topic';
+  $('#next-button').disabled = false;
+  $('#next-button small').textContent = lastTopic ? 'Next chapter' : 'Next topic';
   $('#lesson-body').innerHTML = state.activeMathTopic === 0
     ? complexNumbersLessonTemplate(topic)
     : state.activeMathTopic === 1
@@ -2452,6 +2466,15 @@ function titleMarkup(index) { const titles = ['A new way to<br><i>think</i> abou
 function showToast(message) { const toast = $('#toast'); toast.textContent = message; toast.style.display = 'block'; setTimeout(() => toast.style.display = 'none', 2200); }
 
 $('#previous-button').addEventListener('click', () => {
+  if (state.activeDocTopic >= 0) {
+    if (state.activeDocTopic > 0) loadSiaDocTopic(state.activeDocTopic - 1);
+    else {
+      state.activeDocTopic = -1;
+      state.activeDocSectionIndex = -1;
+      loadMathTopic(mathematicsTopics.length - 1);
+    }
+    return;
+  }
   const sequenceIndex = currentCircuitsAndGatesTopic();
   if (sequenceIndex >= 0) {
     if (sequenceIndex === 0) loadGatePage('circuits');
@@ -2479,6 +2502,11 @@ $('#previous-button').addEventListener('click', () => {
   loadChapter(state.activeChapter - 1);
 });
 $('#next-button').addEventListener('click', () => {
+  if (state.activeDocTopic >= 0) {
+    completeChapter(state.activeChapter);
+    if (state.activeDocTopic < siaDocTopics.length - 1) loadSiaDocTopic(state.activeDocTopic + 1);
+    return;
+  }
   completeChapter(state.activeChapter);
   const sequenceIndex = currentCircuitsAndGatesTopic();
   if (sequenceIndex >= 0) {
@@ -2489,6 +2517,7 @@ $('#next-button').addEventListener('click', () => {
   if (state.activeChapter === 0) return state.activeTopic < fundamentalsTopics.length - 1 ? loadTopic(state.activeTopic + 1) : loadChapter(1);
   if (state.activeChapter === 1) {
     if (state.activeMathTopic < mathematicsTopics.length - 1) loadMathTopic(state.activeMathTopic + 1);
+    else loadSiaDocTopic(0);
     return;
   }
   if (state.activeChapter === 2) {
@@ -2518,6 +2547,23 @@ function mathTopicFromHash(hash) {
   return numericRoute ? Number(hash.slice(6)) - 1 : -1;
 }
 function loadRouteFromHash(hash) {
+  const siaDocRoute = /^#sia-doc-(\d+)$/.exec(hash);
+  if (siaDocRoute) {
+    const index = Number(siaDocRoute[1]) - 1;
+    if (index < 0 || index >= siaDocTopics.length) return false;
+    if (state.activeDocTopic !== index) loadSiaDocTopic(index, false);
+    return true;
+  }
+  state.activeDocTopic = -1;
+  state.activeDocSectionIndex = -1;
+  const basicsRoute = /^#basics-(\d+)$/.exec(hash);
+  if (basicsRoute) {
+    const index = Number(basicsRoute[1]) - 1;
+    if (index < 0 || index >= fundamentalsTopics.length) return false;
+    if (state.activeChapter !== 0 || state.activeTopic !== index) loadTopic(index, false);
+    return true;
+  }
+  if (!hash || hash === '#top') { loadTopic(0, false); return true; }
   const mathIndex = mathTopicFromHash(hash);
   if (mathIndex >= 0) {
     if (state.activeChapter !== 1 || state.activeMathTopic !== mathIndex) loadMathTopic(mathIndex, false);
