@@ -2288,7 +2288,129 @@ function formatReferenceText(text) {
     .replace(/\n/g, '<br>');
 }
 
+function ordered3DExampleMarkup({ number, title, concept, code, output, explanation, links, preview, linkImmediatelyBelowCode = false }) {
+  return `<article class="qubit-section notebook-example structured-3d-example" id="3d-example-${number}">
+    <h3>Example ${number}. ${formatReferenceText(title)}</h3>
+    <div class="structured-example-step"><h4>Concept</h4><p>${formatReferenceText(concept)}</p></div>
+    <div class="structured-example-step"><h4>Original Code · Sia Script</h4><pre class="hdqs-code"><code>${escapeLessonText(code)}</code></pre>${linkImmediatelyBelowCode ? `<div class="structured-example-links">${links.map((link) => `<a class="model-action-link" href="${escapeLessonText(link.href)}" target="_blank" rel="noopener noreferrer">Open ${formatReferenceText(link.filename)} ↗</a>`).join('')}</div>` : ''}</div>
+    <div class="structured-example-step"><h4>Output</h4>${output ? `<pre class="hdqs-output"><code>${escapeLessonText(output)}</code></pre>` : `<p>${formatReferenceText(output)}</p>`}${preview || ''}</div>
+    <div class="structured-example-step"><h4>Explanation</h4><p>${formatReferenceText(explanation)}</p></div>
+    <div class="structured-example-step structured-example-links"><h4>Link</h4>${links.map((link) => `<a class="model-action-link" href="${escapeLessonText(link.href)}" ${link.download ? 'download' : 'target="_blank" rel="noopener noreferrer"'}>${formatReferenceText(link.label)}</a>`).join('')}</div>
+  </article>`;
+}
+
+function sia3DModelsLessonMarkup() {
+  const examplesByNumber = new Map(siaNotebookExamples.filter((example) => example.number >= 213 && example.number <= 219).map((example) => [example.number, example]));
+  const explorerExamples = [
+    {
+      number: 37,
+      title: 'Phasors: rotation makes waves',
+      concept: 'The 3D helix links circular rotation to sine and cosine projections: turn it to see the circle end-on, sine from the side, and cosine from above.',
+      code: 'from sia import hdqs\nhdqs.explore("phasor")',
+      output: "'phasor.html'",
+      explanation: 'The phasor explorer writes the default phasor page. Its rotating helix makes the relationship between circular motion and the wave projections visible.',
+      links: [{ href: 'assets/interactive-quantum/phasor.html', filename: 'phasor.html', label: 'Open phasor.html interactive visualization ↗' }],
+      linkImmediatelyBelowCode: true
+    },
+    {
+      number: 40,
+      title: 'Superposition and entanglement from your own registers',
+      concept: 'Prepare a one-qubit rotated state and a two-qubit Bell state, then open an explorer for each register.',
+      code: 'from sia import hdqs\nprint(hdqs(1).ry(0, 1.0).explore("my_qubit.html"))\nprint(hdqs(2).h(0).cx(0, 1).explore("my_bell.html"))',
+      output: 'my_qubit.html\nmy_bell.html',
+      explanation: 'The first explorer shows the rotated qubit. The second shows the Bell register prepared with H and controlled-X, allowing the state’s superposition and entanglement to be explored.',
+      links: [
+        { href: 'assets/interactive-quantum/my_qubit.html', filename: 'my_qubit.html', label: 'Open my_qubit.html interactive visualization ↗' },
+        { href: 'assets/interactive-quantum/my_bell.html', filename: 'my_bell.html', label: 'Open my_bell.html interactive visualization ↗' }
+      ],
+      linkImmediatelyBelowCode: true
+    },
+    {
+      number: 41,
+      title: 'A Fourier series drawn by phasors',
+      concept: 'Phasors rotating at odd multiples of the base frequency add head to tail to form a square wave; the ripple at the jump is the Gibbs phenomenon.',
+      code: 'from sia import hdqs\nhdqs.explore("phasor", "square_wave.html", state="square")',
+      output: "'square_wave.html'",
+      explanation: 'The phasor explorer is initialized in its square-wave state and saved as square_wave.html.',
+      links: [{ href: 'assets/interactive-quantum/square_wave.html', filename: 'square_wave.html', label: 'Open square_wave.html interactive visualization ↗' }],
+      linkImmediatelyBelowCode: true
+    }
+  ];
+  const explorerSection = `<section class="qubit-section structured-3d-section" aria-labelledby="interactive-3d-visualizations-title">
+    <h2 id="interactive-3d-visualizations-title">Interactive 3D Visualizations</h2>
+    <p>These original Sia Script explorer pages are self-contained HTML outputs. Open each one to rotate or interact with its visualization.</p>
+    ${explorerExamples.map((example) => ordered3DExampleMarkup({ ...example, linkImmediatelyBelowCode: true })).join('')}
+  </section>`;
+
+  const modelDetails = {
+    213: {
+      concept: 'Export the Bloch-sphere (b), Q-sphere (q), and density-matrix (d) views of a two-qubit circuit as one named-object glTF scene.',
+      output: 'The cell writes scene.glb; it does not print a console report.',
+      explanation: 'Import scene.glb in Blender using File > Import > glTF 2.0. The notebook notes that the parts are named objects.',
+      file: 'scene.glb', format: 'GLB', preview: 'glb'
+    },
+    214: {
+      concept: 'Export a rotated one-qubit Bloch-sphere view in Wavefront OBJ format with a companion material file.',
+      explanation: 'Keep bloch.obj and bloch.mtl in the same directory. The OBJ stores the mesh and refers to its MTL for material colors; this MTL has no texture-file references.',
+      file: 'bloch.obj', companion: 'bloch.mtl', format: 'OBJ + MTL', preview: 'obj'
+    },
+    215: {
+      concept: 'Create a colour 3MF of a Bell pair with the requested sphere diameter set to 60 mm.',
+      explanation: 'The saved report marks the model watertight, lists its minimum feature and dimensions, and recommends supports for the reported overhangs.',
+      file: 'bell.3mf', format: '3MF'
+    },
+    216: {
+      concept: 'Create a fine resin Bloch-sphere print with a 50 mm diameter and no base.',
+      explanation: 'The recorded report marks the model watertight and notes that, without a base, the sphere rests on one point and may need supports or glue.',
+      file: 'qubit.stl', format: 'STL'
+    },
+    217: {
+      concept: 'Export Q-sphere and density-matrix terrain with a 70 mm diameter and 1.6 mm wall thickness.',
+      explanation: 'The recorded 3MF report lists a watertight model and recommends supports for its reported overhangs.',
+      file: 'terrain.3mf', format: '3MF'
+    },
+    218: {
+      concept: 'Export a low-detail Bloch-sphere STL without labels or the printed report, then inspect selected printability values.',
+      explanation: 'The output reports the model dimensions, triangle count, minimum feature size, and watertight status from the register’s stored print report.',
+      file: 'quick.stl', format: 'STL'
+    },
+    219: {
+      concept: 'Export a 40 mm Bell-pair 3MF without printing its report, then read selected report fields from the register.',
+      explanation: 'The report data marks the model watertight and recommends supports. It also records that a small label was omitted because it would not print at the selected wall thickness.',
+      file: 'report_demo.3mf', format: '3MF'
+    }
+  };
+  const modelExamples = [213, 214, 215, 216, 217, 218, 219].map((number) => {
+    const example = examplesByNumber.get(number);
+    const detail = modelDetails[number];
+    let output = example.output;
+    if (number === 213) output = detail.output;
+    const preview = detail.preview ? `<div class="model-preview" data-model-preview="${detail.preview}" data-model-url="assets/interactive-3d/models/${detail.file}" ${detail.companion ? `data-material-url="assets/interactive-3d/models/${detail.companion}"` : ''} role="img" aria-label="Interactive preview of ${detail.file}"><span class="model-preview-status" data-model-status>Loading preview…</span></div>` : '<p class="model-no-preview">No in-browser preview is provided for this print format. Download the file and open it in a compatible viewer or slicer.</p>';
+    const links = [{ href: `assets/interactive-3d/models/${detail.file}`, label: `Download ${detail.file}`, download: true }];
+    if (detail.companion) links.push({ href: `assets/interactive-3d/models/${detail.companion}`, label: `Download companion ${detail.companion}`, download: true });
+    const explanation = `${example.codeExplanation} ${detail.explanation}`;
+    return ordered3DExampleMarkup({ number, title: example.title, concept: detail.concept, code: example.code, output, explanation, links, preview });
+  }).join('');
+  const exportSection = `<section class="qubit-section structured-3d-section" aria-labelledby="3d-model-export-title">
+    <h2 id="3d-model-export-title">3D Model Export and Printing</h2>
+    <p>Examples 213–219 use the notebook’s original Sia Script code and configurations. GLB and OBJ have interactive previews; STL and 3MF are download-only for use in compatible 3D viewers or print slicers.</p>
+    ${modelExamples}
+  </section>`;
+  return `<section class="qubit-lesson sia-reference-lesson structured-3d-lesson">${explorerSection}${exportSection}</section>`;
+}
+
+function sia3DPrintingHandoffMarkup() {
+  const modelsIndex = siaDocTopics.findIndex((topic) => topic.title === '3D Models');
+  return `<section class="qubit-lesson sia-reference-lesson"><div class="qubit-section">
+    <h2>3D Model Export and Printing</h2>
+    <p>The print exports and notebook examples 213–219 are now presented together with the interactive visualizations in the 3D Models lesson.</p>
+    <a class="model-action-link" href="#sia-doc-${modelsIndex + 1}">Open the combined 3D Models lesson ↗</a>
+  </div></section>`;
+}
+
 function siaDocLessonMarkup(topic) {
+  if (topic.title === '3D Models') return sia3DModelsLessonMarkup();
+  if (topic.title === '3D Printing') return sia3DPrintingHandoffMarkup();
   const partIntros = topic.notebookParts.map((part) => {
     const intro = part.intro.replace(/^## Part [^\n]+\n+/, '');
     return `<p>${formatReferenceText(intro)}</p>`;
@@ -2304,10 +2426,177 @@ function siaDocLessonMarkup(topic) {
     ${example.assets.map((asset) => `<figure class="notebook-output-figure"><img src="${escapeLessonText(asset)}" alt="Saved notebook output: ${escapeLessonText(example.title)}"><figcaption>Saved notebook output: ${formatReferenceText(example.title)}.</figcaption></figure>`).join('')}
     ${example.outputExplanation ? `<p class="notebook-explanation"><strong>Output explanation.</strong> ${formatReferenceText(example.outputExplanation)}</p>` : ''}
   </section>`).join('');
+  const interactiveVisualizations = topic.title === '3D Models' ? `<section class="qubit-section interactive-visualizations" aria-labelledby="interactive-visualizations-title">
+    <h2 id="interactive-visualizations-title">Interactive Quantum Visualizations</h2>
+    <p>Open an original Sia Script visualization in a new tab and explore it directly.</p>
+    <div class="interactive-visualization-grid">
+      <a class="interactive-visualization-card" href="assets/interactive-quantum/my_bell.html" target="_blank" rel="noopener noreferrer"><span class="card-label">Two-qubit state</span><strong>Bell Pair Explorer</strong><span>Rotate and inspect the entangled Bell pair.</span><span class="visualization-open">Open visualization ↗</span></a>
+      <a class="interactive-visualization-card" href="assets/interactive-quantum/my_qubit.html" target="_blank" rel="noopener noreferrer"><span class="card-label">Single-qubit state</span><strong>Qubit Explorer</strong><span>Explore a qubit’s state and its Bloch-sphere views.</span><span class="visualization-open">Open visualization ↗</span></a>
+      <a class="interactive-visualization-card" href="assets/interactive-quantum/phasor.html" target="_blank" rel="noopener noreferrer"><span class="card-label">Rotating waves</span><strong>Phasor Explorer</strong><span>Rotate the 3D phasor helix and follow its wave projections.</span><span class="visualization-open">Open visualization ↗</span></a>
+      <a class="interactive-visualization-card" href="assets/interactive-quantum/square_wave.html" target="_blank" rel="noopener noreferrer"><span class="card-label">Fourier series</span><strong>Square Wave Explorer</strong><span>See how rotating phasors combine to form a square wave.</span><span class="visualization-open">Open visualization ↗</span></a>
+    </div>
+  </section>` : '';
+  const interactive3DModels = topic.title === '3D Models' ? `<section class="qubit-section interactive-3d-models" aria-labelledby="interactive-3d-models-title">
+    <h2 id="interactive-3d-models-title">Interactive 3D Models</h2>
+    <p>Rotate previews with a mouse or touch, and use the scroll wheel or pinch gesture to zoom. Printable files are available to download.</p>
+    <div class="interactive-model-grid">
+      <article class="interactive-visualization-card interactive-model-card">
+        <span class="card-label">GLB · Example 213</span><strong>scene.glb</strong>
+        <span>Bell-pair circuit shown as Bloch, Q-sphere, and density-matrix scene objects.</span>
+        <div class="model-preview" data-model-preview="glb" data-model-url="assets/interactive-3d/models/scene.glb" role="img" aria-label="Interactive preview of scene.glb"><span class="model-preview-status" data-model-status>Loading preview…</span></div>
+        <div class="model-actions"><a href="assets/interactive-3d/models/scene.glb" download>Download GLB</a></div>
+      </article>
+      <article class="interactive-visualization-card interactive-model-card">
+        <span class="card-label">OBJ + MTL · Example 214</span><strong>bloch.obj</strong>
+        <span>Bloch-sphere model for the notebook’s rotated one-qubit state. Its material file has no external textures.</span>
+        <div class="model-preview" data-model-preview="obj" data-model-url="assets/interactive-3d/models/bloch.obj" data-material-url="assets/interactive-3d/models/bloch.mtl" role="img" aria-label="Interactive preview of bloch.obj"><span class="model-preview-status" data-model-status>Loading preview…</span></div>
+        <div class="model-actions"><a href="assets/interactive-3d/models/bloch.obj" download>Download OBJ</a><a href="assets/interactive-3d/models/bloch.mtl" download>Download MTL</a></div>
+      </article>
+      <article class="interactive-visualization-card interactive-model-card">
+        <span class="card-label">3MF · Example 215</span><strong>bell.3mf</strong>
+        <span>Colour Bell-pair print at the notebook’s 60 mm sphere diameter setting.</span>
+        <div class="model-actions"><a href="assets/interactive-3d/models/bell.3mf" download>Download 3MF</a></div>
+      </article>
+      <article class="interactive-visualization-card interactive-model-card">
+        <span class="card-label">STL · Example 216</span><strong>qubit.stl</strong>
+        <span>Resin Bloch-sphere print using the 50 mm setting, without a base.</span>
+        <div class="model-actions"><a href="assets/interactive-3d/models/qubit.stl" download>Download STL</a></div>
+      </article>
+      <article class="interactive-visualization-card interactive-model-card">
+        <span class="card-label">3MF · Example 217</span><strong>terrain.3mf</strong>
+        <span>Q-sphere and density-matrix terrain with a 70 mm diameter and 1.6 mm wall.</span>
+        <div class="model-actions"><a href="assets/interactive-3d/models/terrain.3mf" download>Download 3MF</a></div>
+      </article>
+      <article class="interactive-visualization-card interactive-model-card">
+        <span class="card-label">STL · Example 218</span><strong>quick.stl</strong>
+        <span>Low-detail single-qubit Bloch sphere with labels disabled.</span>
+        <div class="model-actions"><a href="assets/interactive-3d/models/quick.stl" download>Download STL</a></div>
+      </article>
+      <article class="interactive-visualization-card interactive-model-card">
+        <span class="card-label">3MF · Example 219</span><strong>report_demo.3mf</strong>
+        <span>Bell-pair print created with the notebook’s 40 mm report-data example.</span>
+        <div class="model-actions"><a href="assets/interactive-3d/models/report_demo.3mf" download>Download 3MF</a></div>
+      </article>
+    </div>
+  </section>` : '';
   return `<section class="qubit-lesson sia-reference-lesson">
     <div class="qubit-section"><h2>Concepts and notation</h2><p>${formatReferenceText(topic.theory)}</p>${partIntros}</div>
     <div class="qubit-section"><h2>Documented Sia Script examples</h2>${examples}</div>
+    ${interactiveVisualizations}
+    ${interactive3DModels}
   </section>`;
+}
+
+let interactive3DModulesPromise;
+function initializeInteractive3DModels() {
+  const previews = [...document.querySelectorAll('[data-model-preview]')];
+  if (!previews.length) return;
+  if (!interactive3DModulesPromise) {
+    interactive3DModulesPromise = Promise.all([
+      import('./assets/interactive-3d/vendor/build/three.module.js'),
+      import('./assets/interactive-3d/vendor/examples/jsm/controls/OrbitControls.js'),
+      import('./assets/interactive-3d/vendor/examples/jsm/loaders/GLTFLoader.js'),
+      import('./assets/interactive-3d/vendor/examples/jsm/loaders/MTLLoader.js'),
+      import('./assets/interactive-3d/vendor/examples/jsm/loaders/OBJLoader.js')
+    ]).then(([THREE, { OrbitControls }, { GLTFLoader }, { MTLLoader }, { OBJLoader }]) => ({ THREE, OrbitControls, GLTFLoader, MTLLoader, OBJLoader }));
+  }
+  interactive3DModulesPromise.then(({ THREE, OrbitControls, GLTFLoader, MTLLoader, OBJLoader }) => {
+    previews.forEach((preview) => {
+      if (preview.dataset.initialized) return;
+      preview.dataset.initialized = 'true';
+      const status = preview.querySelector('[data-model-status]');
+      const canvas = document.createElement('canvas');
+      canvas.setAttribute('aria-hidden', 'true');
+      preview.prepend(canvas);
+      const scene = new THREE.Scene();
+      scene.background = new THREE.Color(0xf8fafb);
+      const camera = new THREE.PerspectiveCamera(38, 1, 0.01, 1000);
+      const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: false });
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+      renderer.outputColorSpace = THREE.SRGBColorSpace;
+      scene.add(new THREE.HemisphereLight(0xffffff, 0x7c8790, 2.1));
+      const keyLight = new THREE.DirectionalLight(0xffffff, 2.2);
+      keyLight.position.set(3, 5, 4);
+      scene.add(keyLight);
+      const controls = new OrbitControls(camera, canvas);
+      controls.enableDamping = true;
+      controls.dampingFactor = 0.07;
+      controls.minDistance = 0.7;
+      controls.maxDistance = 12;
+      let model;
+      const renderFrame = () => {
+        if (!canvas.isConnected) {
+          controls.dispose();
+          renderer.dispose();
+          if (model) model.traverse((part) => {
+            if (part.geometry) part.geometry.dispose();
+            if (Array.isArray(part.material)) part.material.forEach((material) => material.dispose());
+            else if (part.material) part.material.dispose();
+          });
+          return;
+        }
+        const width = Math.max(preview.clientWidth, 1);
+        const height = Math.max(preview.clientHeight, 1);
+        if (canvas.width !== Math.round(width * renderer.getPixelRatio()) || canvas.height !== Math.round(height * renderer.getPixelRatio())) {
+          renderer.setSize(width, height, false);
+          camera.aspect = width / height;
+          camera.updateProjectionMatrix();
+        }
+        controls.update();
+        renderer.render(scene, camera);
+        requestAnimationFrame(renderFrame);
+      };
+      const showModel = (object) => {
+        model = object;
+        const bounds = new THREE.Box3().setFromObject(model);
+        const size = bounds.getSize(new THREE.Vector3());
+        const center = bounds.getCenter(new THREE.Vector3());
+        const largestSide = Math.max(size.x, size.y, size.z) || 1;
+        model.position.sub(center);
+        model.scale.multiplyScalar(1.8 / largestSide);
+        scene.add(model);
+        const radius = new THREE.Sphere().setFromObject(model).radius || 1;
+        const distance = radius / Math.sin(THREE.MathUtils.degToRad(camera.fov / 2)) * 1.12;
+        camera.position.set(distance * 0.85, distance * 0.58, distance);
+        camera.near = Math.max(distance / 100, 0.001);
+        camera.far = distance * 100;
+        camera.updateProjectionMatrix();
+        controls.target.set(0, 0, 0);
+        controls.update();
+        if (status) status.remove();
+        requestAnimationFrame(renderFrame);
+      };
+      const url = (path) => new URL(path, document.baseURI).href;
+      const failed = (error) => {
+        if (status) status.textContent = 'Preview could not be loaded. Use the download link below.';
+        console.error('Interactive 3D model preview failed:', preview.dataset.modelUrl, error);
+        renderer.dispose();
+      };
+      try {
+        if (preview.dataset.modelPreview === 'glb') {
+          new GLTFLoader().load(url(preview.dataset.modelUrl), (gltf) => showModel(gltf.scene), undefined, failed);
+        } else {
+          const modelDirectory = url('assets/interactive-3d/models/');
+          const materials = new MTLLoader();
+          materials.setResourcePath(modelDirectory);
+          materials.load(url(preview.dataset.materialUrl), (materialLibrary) => {
+            materialLibrary.preload();
+            const objects = new OBJLoader();
+            objects.setMaterials(materialLibrary);
+            objects.load(url(preview.dataset.modelUrl), showModel, undefined, failed);
+          }, undefined, failed);
+        }
+      } catch (error) {
+        failed(error);
+      }
+    });
+  }).catch((error) => {
+    previews.forEach((preview) => {
+      const status = preview.querySelector('[data-model-status]');
+      if (status) status.textContent = 'Preview viewer could not be loaded. Use the download link below.';
+    });
+    console.error('Interactive 3D viewer dependencies failed to load:', error);
+  });
 }
 
 function loadSiaDocTopic(topicIndex, updateHash = true) {
@@ -2334,6 +2623,7 @@ function loadSiaDocTopic(topicIndex, updateHash = true) {
   $('#next-button').disabled = !next;
   $('#next-button small').textContent = 'Next topic';
   $('#lesson-body').innerHTML = siaDocLessonMarkup(topic);
+  if (topic.title === '3D Models') initializeInteractive3DModels();
   $('#mobile-breadcrumb').innerHTML = `Chapter ${String(topic.chapter + 1).padStart(2, '0')} <span>/</span> ${topic.title}`;
   $('#doc-breadcrumb').innerHTML = `${navigationSections[topic.sectionIndex + 2].title} <span>/</span> ${topic.title}`;
   renderSidebar();

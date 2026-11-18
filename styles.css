@@ -879,8 +879,106 @@ body { background: #fff; }
 .notebook-output-figure img { display: block; width: auto; max-width: min(100%, 760px); max-height: 620px; object-fit: contain; border: 1px solid var(--line); background: #fff; }
 .notebook-output-figure figcaption { margin-top: 7px; color: var(--muted); font: 10px var(--mono); }
 .lesson-body code { overflow-wrap: anywhere; }
+.interactive-visualization-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 230px), 1fr));
+  gap: 12px;
+  margin-top: 18px;
+}
+.interactive-visualization-card {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 8px;
+  padding: 18px;
+  border: 1px solid var(--line);
+  background: rgba(255,255,255,.82);
+  color: var(--ink);
+  text-decoration: none;
+  transition: border-color .18s ease, transform .18s ease, box-shadow .18s ease;
+}
+.interactive-visualization-card:hover,
+.interactive-visualization-card:focus-visible {
+  border-color: var(--teal);
+  box-shadow: 0 8px 24px rgba(26, 83, 104, .09);
+  transform: translateY(-2px);
+}
+.interactive-visualization-card:focus-visible { outline: 2px solid var(--teal); outline-offset: 3px; }
+.interactive-visualization-card strong { font: 600 18px/1.3 var(--serif); }
+.interactive-visualization-card > span:not(.card-label):not(.visualization-open) { color: var(--muted); font-size: 12px; line-height: 1.6; }
+.interactive-visualization-card .visualization-open { margin-top: auto; padding-top: 8px; color: var(--teal-dark); font: 10px var(--mono); }
+.interactive-3d-models { margin-top: 34px; }
+.structured-3d-section + .structured-3d-section { margin-top: 36px; }
+.structured-3d-section > h2 { margin-bottom: 10px; }
+.structured-3d-example { margin-top: 22px; padding-top: 20px; }
+.structured-example-step { margin-top: 17px; }
+.structured-example-step > h4 { margin: 0 0 7px; color: var(--teal-dark); font: 600 11px/1.4 var(--mono); letter-spacing: .045em; text-transform: uppercase; }
+.structured-example-step > p { margin: 0; font-size: 13px; line-height: 1.7; }
+.structured-example-step > .hdqs-code,
+.structured-example-step > .hdqs-output { margin: 0; }
+.structured-example-links { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.structured-example-step > .structured-example-links { margin-top: 8px; }
+.structured-example-links > h4 { flex-basis: 100%; }
+.model-action-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 36px;
+  padding: 8px 11px;
+  border: 1px solid var(--line);
+  color: var(--teal-dark);
+  font: 10px var(--mono);
+  text-decoration: none;
+}
+.model-action-link:hover, .model-action-link:focus-visible { border-color: var(--teal); background: #f3fbfc; }
+.model-action-link:focus-visible { outline: 2px solid var(--teal); outline-offset: 2px; }
+.model-no-preview { margin-top: 10px !important; padding: 10px; border-left: 2px solid var(--line); color: var(--muted); }
+.interactive-model-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 270px), 1fr));
+  gap: 14px;
+  margin-top: 18px;
+}
+.interactive-model-card { align-items: stretch; }
+.interactive-model-card > strong { overflow-wrap: anywhere; }
+.model-preview {
+  position: relative;
+  width: 100%;
+  height: clamp(190px, 24vw, 270px);
+  margin-top: 8px;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  background: #f8fafb;
+  touch-action: none;
+}
+.model-preview canvas { display: block; width: 100%; height: 100%; cursor: grab; }
+.model-preview canvas:active { cursor: grabbing; }
+.model-preview-status {
+  position: absolute;
+  inset: auto 8px 8px;
+  padding: 6px 8px;
+  background: rgba(255,255,255,.9);
+  color: var(--muted);
+  font: 10px/1.5 var(--mono);
+  pointer-events: none;
+}
+.model-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: auto; padding-top: 14px; }
+.model-actions a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 36px;
+  padding: 8px 11px;
+  border: 1px solid var(--line);
+  color: var(--teal-dark);
+  font: 10px var(--mono);
+  text-decoration: none;
+}
+.model-actions a:hover, .model-actions a:focus-visible { border-color: var(--teal); background: #f3fbfc; }
+.model-actions a:focus-visible { outline: 2px solid var(--teal); outline-offset: 2px; }
 @media (max-width: 560px) {
   .notebook-example { margin-top: 24px; padding-top: 18px; }
   .notebook-example h3 { font-size: 17px; }
   .notebook-output-figure img { max-height: 460px; }
+  .interactive-visualization-card { padding: 15px; }
+  .interactive-model-grid { grid-template-columns: minmax(0, 1fr); }
+  .model-preview { height: 230px; }
 }
