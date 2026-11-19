@@ -9,6 +9,138 @@ const chapters = [
   { title: 'Quantum Applications', time: '9 min read', intro: 'The field is still young, but its questions are ambitious: new medicines, new materials, and new ways to sense the world.', type: 'Frontiers & impact' }
 ];
 
+// Additive learning supports for the Phase 1 lessons. These blocks wrap the
+// existing lesson markup without changing its source content or interactions.
+const phaseOneLessonSupport = {
+  'fundamentals-0': {
+    objectives: ['Describe what quantum information is used for.', 'Distinguish a classical bit from a qubit at a high level.', 'Explain the prepare, transform, and measure cycle.'],
+    prerequisites: ['No prior quantum or advanced-math knowledge is required.'],
+    introduction: 'A quantum computation starts with a system, changes it through operations, and reads a classical result. The goal is to design those operations so useful outcomes become more likely.',
+    steps: ['Start with the question or task the computation should address.', 'Prepare a quantum state that represents the starting information.', 'Apply operations that shape amplitudes, phase, and correlations.', 'Measure the system and interpret the resulting classical data.'],
+    takeaways: ['Quantum computers process quantum states using quantum operations.', 'A measurement returns classical data.', 'Quantum effects are useful when a circuit makes desired outcomes more likely.']
+  },
+  'fundamentals-1': {
+    objectives: ['Recognize the basis states |0⟩ and |1⟩.', 'Read a simple qubit state description.', 'Distinguish a qubit state from the result of one measurement.'],
+    prerequisites: ['Start with <a href="#basics-1">Quantum Fundamentals → Introduction</a>.'],
+    introduction: 'A qubit is described by a quantum state. That description can include contributions from both basis outcomes, while a measurement produces one definite result.',
+    steps: ['Identify the basis states that describe the possible measurement outcomes.', 'Read the state coefficients as amplitudes, not as ordinary probabilities.', 'Use squared amplitude magnitudes to find outcome probabilities.', 'Keep the full state description separate from the single result of a measurement.'],
+    takeaways: ['A qubit has a state described using amplitudes for |0⟩ and |1⟩.', 'A measurement gives one result according to the state’s probabilities.', 'The state contains information beyond one observed result.']
+  },
+  'fundamentals-2': {
+    objectives: ['Explain superposition in terms of a quantum state.', 'Relate amplitudes to measurement probabilities.', 'Explain why one measurement does not return both basis outcomes.'],
+    prerequisites: ['Review <a href="#basics-2">Qubit</a> and <a href="#math-complex-numbers">Complex Numbers</a>.'],
+    introduction: 'Superposition means a state includes multiple possible outcomes before measurement. It does not mean a single measurement displays every outcome at once.',
+    steps: ['Read the state’s amplitudes for each basis outcome.', 'Square each amplitude’s magnitude to calculate its probability.', 'Check that the probabilities add to one for a normalized state.', 'Interpret a measurement as one sampled outcome from that distribution.'],
+    takeaways: ['Amplitudes describe the quantum state; their squared magnitudes give measurement probabilities.', 'One trial returns one result.', 'Repeated measurements reveal the underlying probability distribution.']
+  },
+  'fundamentals-3': {
+    objectives: ['Describe entanglement as a property of a joint state.', 'Identify correlated outcomes in a Bell-state example.', 'Distinguish correlation from communication.'],
+    prerequisites: ['Review <a href="#basics-2">Qubit</a> and <a href="#basics-3">Superposition</a>.'],
+    introduction: 'Two entangled qubits must be described together. Their measurement results can be linked even though neither qubit alone captures the full shared state.',
+    steps: ['Prepare the first qubit in a superposition.', 'Use a controlled operation to connect the qubits.', 'Read the resulting joint state, rather than treating the qubits as independent.', 'Compare repeated pair measurements and identify their correlation.'],
+    takeaways: ['Entanglement is a property of the joint state.', 'A Bell pair produces correlated outcomes in the demonstrated measurement basis.', 'Correlation does not let one qubit send a controllable message to the other.']
+  },
+  'fundamentals-4': {
+    objectives: ['Calculate simple measurement probabilities.', 'Describe how measurement produces a classical record.', 'Distinguish a single sampled result from the predicted distribution.'],
+    prerequisites: ['Review <a href="#basics-2">Qubit</a> and <a href="#basics-3">Superposition</a>.'],
+    introduction: 'Measurement converts a quantum state into a classical result. The state determines the probabilities, but a single trial only shows one outcome.',
+    steps: ['Identify the state and the measurement basis.', 'Calculate each possible result’s probability from its amplitude.', 'Take one measurement and record the returned result.', 'Repeat the experiment to compare the observed frequencies with the prediction.'],
+    takeaways: ['Measurement returns a classical outcome.', 'The quantum state determines outcome probabilities.', 'Finite samples can differ from the exact predicted distribution.']
+  },
+  'math-complex-numbers': {
+    objectives: ['Identify real and imaginary parts of a complex number.', 'Interpret a complex number as a point or arrow.', 'Explain how magnitude and phase are useful in quantum states.'],
+    prerequisites: ['Basic arithmetic is enough; no prior complex-number experience is needed.'],
+    introduction: 'A complex number has two components that can be drawn as coordinates on a plane. In quantum mechanics, its length and direction help describe an amplitude.',
+    steps: ['Locate the real part along the horizontal axis.', 'Locate the imaginary part along the vertical axis.', 'Use the distance from the origin as the magnitude.', 'Use the direction from the origin as the phase, which can affect later interference.'],
+    takeaways: ['Complex numbers have real and imaginary components.', 'Magnitude and phase carry different information.', 'Phase can matter even when an immediate measurement probability is unchanged.']
+  },
+  'math-vectors-inner-products': {
+    objectives: ['Read a vector as an ordered list of components.', 'Explain what normalization means.', 'Interpret an inner product as a measure of overlap.'],
+    prerequisites: ['Review <a href="#math-complex-numbers">Complex Numbers</a>; familiarity with sums and squares is helpful.'],
+    introduction: 'A vector stores several values together. A quantum state vector stores amplitudes, and its normalization ensures the probabilities represented by those amplitudes sum to one.',
+    steps: ['Identify each component and its associated basis state.', 'Calculate the norm using component magnitudes.', 'Normalize the vector so its norm is one.', 'Use the inner product to compare two vectors or calculate their overlap.'],
+    takeaways: ['State-vector components are amplitudes.', 'A normalized state has total probability one.', 'Inner products quantify overlap between vectors.']
+  },
+  'math-tensor-products': {
+    objectives: ['Explain why separate systems need a joint state space.', 'Determine how the number of basis states grows when systems are combined.', 'Distinguish a product state from an entangled state.'],
+    prerequisites: ['Review <a href="#math-vectors-inner-products">Vectors and Inner Products</a>; basic multiplication is helpful.'],
+    introduction: 'Combining systems means listing their joint possibilities. A tensor product is the mathematical rule that builds the combined state from the parts.',
+    steps: ['List the basis states available to each subsystem.', 'Pair each state of the first system with each state of the second.', 'Combine amplitudes according to the tensor-product rule.', 'Check whether the resulting joint state can be separated into independent subsystem states.'],
+    takeaways: ['Joint state spaces grow multiplicatively.', 'Tensor products combine amplitudes and basis states.', 'Entangled states cannot be written as a product of independent subsystem states.']
+  },
+  'math-matrices-matrix-operations': {
+    objectives: ['Read a matrix as a rule that transforms a vector.', 'Interpret a matrix-vector product.', 'Recognize trace, inverse, and conjugate transpose in context.'],
+    prerequisites: ['Review <a href="#math-vectors-inner-products">Vectors and Inner Products</a>; basic multiplication is helpful.'],
+    introduction: 'A matrix is a structured way to describe how a vector changes. Quantum gates use this idea to transform state vectors.',
+    steps: ['Identify the input vector and matrix dimensions.', 'Multiply each matrix row by the input vector to get one output component.', 'Read the output as the transformed vector.', 'Relate any trace, inverse, or dagger operation in the example to the property being checked.'],
+    takeaways: ['Matrix-vector multiplication applies a transformation.', 'The output components depend on the matrix and input state.', 'Matrix properties help describe and check quantum operations.']
+  },
+  'math-eigenvalues-eigenvectors': {
+    objectives: ['Identify an eigenvector and its eigenvalue.', 'Explain the special action an operator has on an eigenvector.', 'Connect observable eigenvalues with possible measurement outcomes.'],
+    prerequisites: ['Review <a href="#math-matrices-matrix-operations">Matrices and Matrix Operations</a> and <a href="#math-vectors-inner-products">Vectors and Inner Products</a>.'],
+    introduction: 'Most transformations change a vector’s direction. An eigenvector is a special vector whose direction stays the same; its eigenvalue tells how the operator scales it.',
+    steps: ['Apply the operator to the candidate vector.', 'Check whether the result is a scalar multiple of the original.', 'Read that scalar as the eigenvalue.', 'For an observable, interpret its eigenvalues as possible measurement values.'],
+    takeaways: ['Eigenvectors are special states for an operator.', 'The eigenvalue is the associated scale factor.', 'Observable eigenvalues correspond to possible measurement results.']
+  },
+  'math-hermitian-unitary-matrices': {
+    objectives: ['Distinguish Hermitian and unitary matrices.', 'Explain the role of Hermitian operators in measurement.', 'Explain why unitary gates preserve valid state vectors.'],
+    prerequisites: ['Review <a href="#math-matrices-matrix-operations">Matrices and Matrix Operations</a> and <a href="#math-eigenvalues-eigenvectors">Eigenvalues and Eigenvectors</a>.'],
+    introduction: 'Two matrix properties answer different questions: Hermitian matrices describe measurable quantities, while unitary matrices describe reversible quantum transformations.',
+    steps: ['Form the conjugate transpose of the matrix.', 'Compare it with the original to check the Hermitian property.', 'For unitarity, multiply the conjugate transpose by the matrix.', 'Interpret the identity result as preservation of lengths and valid state normalization.'],
+    takeaways: ['Hermitian operators model observables.', 'Unitary operators model valid reversible gates.', 'These properties connect the math to measurement and state evolution.']
+  },
+  'gate-set': {
+    objectives: ['Describe a gate as a state transformation.', 'Compare single-qubit and controlled gates.', 'Explain why gate order can change the result.'],
+    prerequisites: ['Review <a href="#basics-2">Qubit</a>, <a href="#math-matrices-matrix-operations">Matrices and Matrix Operations</a>, and <a href="#math-hermitian-unitary-matrices">Hermitian and Unitary Matrices</a>.'],
+    introduction: 'A quantum gate is an operation applied to a qubit or register. A circuit’s result depends on both which gates are used and the order in which they act.',
+    steps: ['Read the input state before applying a gate.', 'Identify which qubit or qubits the gate acts on.', 'Apply the gate’s documented transformation to the state.', 'Compare the output state and probabilities, keeping phase changes in mind.'],
+    takeaways: ['Gates transform quantum states.', 'Controlled gates act on relationships between qubits.', 'Gate order matters because transformations need not commute.']
+  },
+  'circuit-intro': {
+    objectives: ['Identify qubits, gates, and measurements in a circuit.', 'Read the circuit operations in order.', 'Relate the final state to measured output.'],
+    prerequisites: ['Review <a href="#basics-2">Qubit</a> and <a href="#gate-introduction">The Gate Set</a>.'],
+    introduction: 'A quantum circuit is a recipe: it starts with qubits, applies gates in a chosen order, and measures selected parts to produce classical data.',
+    steps: ['Read the initial qubit lines and their starting states.', 'Follow each gate from left to right and note its target qubits.', 'Track how the state changes after each layer.', 'At measurement, connect possible outcomes to their predicted probabilities.'],
+    takeaways: ['Circuits organize quantum operations in sequence.', 'Intermediate states help explain how a result is produced.', 'Measurement outcomes are sampled from the circuit’s final state.']
+  },
+  'algorithms': {
+    objectives: ['State the task an algorithm example addresses.', 'Identify its preparation, operation, and measurement stages.', 'Interpret its reported result in the context of the run.'],
+    prerequisites: ['Review <a href="#circuit-1">Introduction to Quantum Circuits</a> and <a href="#gate-introduction">The Gate Set</a>.'],
+    introduction: 'A quantum algorithm is a sequence of operations designed for a particular task. Start with the question it asks, then inspect how the circuit encodes and reads the answer.',
+    steps: ['Read the example’s inputs and determine what result it seeks.', 'Identify how the starting state is prepared.', 'Follow the algorithm’s gates or oracle and note how they change the state.', 'Interpret the measured result using the example’s stated settings and output.'],
+    takeaways: ['Each algorithm has a specific task and assumptions.', 'The circuit’s operations shape measurement probabilities.', 'A saved result describes that run; it is not a guarantee for every finite sample.']
+  },
+  'simulation-modes': {
+    objectives: ['Recognize common simulation representations.', 'Relate a representation to the information it retains.', 'Identify tradeoffs involving circuit structure, noise, and resources.'],
+    prerequisites: ['Review <a href="#math-vectors-inner-products">Vectors and Inner Products</a> and <a href="#circuit-7">Circuit Execution &amp; Simulation</a>.'],
+    introduction: 'A simulation mode is a way to represent and calculate a circuit on a classical computer. Different representations suit different circuit structures and questions.',
+    steps: ['Identify the mode named in the example.', 'Ask what state information that mode represents, such as a pure state or a mixed state.', 'Check whether noise, sampling, or circuit structure affects the choice.', 'Read resource estimates and output in light of those assumptions.'],
+    takeaways: ['No single simulation representation suits every circuit.', 'The chosen mode affects what can be represented and what resources are needed.', 'Interpret results together with their mode and assumptions.']
+  },
+  'browser-playground': {
+    objectives: ['Recognize the role of the HDQS playground.', 'Map a chain of commands to circuit operations.', 'Interpret the generated playground and its documented output.'],
+    prerequisites: ['Review <a href="#circuit-1">Introduction to Quantum Circuits</a> and <a href="#sia-doc-1">Basic Circuits</a>. Basic Python familiarity is helpful but not required to follow the example.'],
+    introduction: 'HDQS provides commands for describing and inspecting quantum programs. The browser playground packages a documented circuit into an interactive page for exploration.',
+    steps: ['Read the register size and identify the qubits.', 'Follow each chained operation in order.', 'Relate the generated page to the circuit it loads.', 'Use the playground to inspect the circuit step by step and connect operations with the resulting state.'],
+    takeaways: ['A chain of HDQS operations describes an ordered circuit.', 'The playground makes a circuit easier to inspect interactively.', 'The generated filename confirms the artifact; it is distinct from a measurement result.']
+  }
+};
+
+function lessonSupportMarkup(key) {
+  const support = phaseOneLessonSupport[key];
+  if (!support) return '';
+  const list = (items) => `<ul>${items.map((item) => `<li>${item}</li>`).join('')}</ul>`;
+  return `<section class="visual-card lesson-support-card" aria-label="Learning objectives and prerequisites"><h3>Learning Objectives</h3>${list(support.objectives)}<h3>Prerequisites</h3>${list(support.prerequisites)}<h3>Plain-language Introduction</h3><p>${support.introduction}</p></section>`;
+}
+
+function addLessonSupport(key) {
+  const support = phaseOneLessonSupport[key];
+  if (!support) return;
+  const body = $('#lesson-body');
+  body.insertAdjacentHTML('afterbegin', lessonSupportMarkup(key));
+  body.insertAdjacentHTML('beforeend', `<section class="visual-card lesson-support-card" aria-label="Step-by-step explanation"><h3>Step-by-step Explanation</h3><ol>${support.steps.map((step) => `<li>${step}</li>`).join('')}</ol></section><aside class="key-idea lesson-support-takeaways"><span class="card-label">Key Takeaways</span>${support.takeaways.map((item) => `<p>${item}</p>`).join('')}</aside>`);
+}
+
 const fundamentalsTopics = [
   { title: 'Introduction', time: '8 min read', intro: 'Learn the core concepts that form the foundation of quantum computing. Understand how quantum mechanics works and why it enables new possibilities in computing.', type: 'Concepts & intuition' },
   { title: 'Qubit', time: '6 min read', intro: 'A qubit is the smallest unit of quantum information, with a state that can be described as a blend of two possibilities.', type: 'Concepts & intuition' },
@@ -1849,6 +1981,7 @@ function loadCircuitTopic(topicIndex, updateHash = true) {
   $('#next-button').disabled = false;
   $('#next-button small').textContent = isLast ? 'Next chapter' : 'Next topic';
   $('#lesson-body').innerHTML = circuitLessonTemplate(state.activeCircuitTopic);
+  if (isPrimaryTopic) addLessonSupport('circuit-intro');
   $('#mobile-breadcrumb').innerHTML = `Chapter 04 <span>/</span> ${topic.title}`;
   $('#doc-breadcrumb').innerHTML = `Quantum Circuits <span>/</span> ${topic.title}`;
   renderSidebar();
@@ -2599,6 +2732,8 @@ function loadSiaDocTopic(topicIndex, updateHash = true) {
   $('#next-button').disabled = !next;
   $('#next-button small').textContent = 'Next topic';
   $('#lesson-body').innerHTML = siaDocLessonMarkup(topic);
+  if (topic.title === 'Simulation Modes') addLessonSupport('simulation-modes');
+  if (topic.title === 'The Browser Playground') addLessonSupport('browser-playground');
   if (topic.title === '3D Models') initializeInteractive3DModels();
   $('#mobile-breadcrumb').innerHTML = `Chapter ${String(topic.chapter + 1).padStart(2, '0')} <span>/</span> ${topic.title}`;
   $('#doc-breadcrumb').innerHTML = `${navigationSections[topic.sectionIndex + 2].title} <span>/</span> ${topic.title}`;
@@ -2648,6 +2783,7 @@ function loadGatePage(page, updateHash = true) {
   $('#next-button').disabled = false;
   $('#next-button small').textContent = 'Next topic';
   $('#lesson-body').innerHTML = gatePageTemplate(page);
+  if (page === 'introduction') addLessonSupport('gate-set');
   $('#mobile-breadcrumb').innerHTML = `Chapter 03 <span>/</span> ${gatePageInfo[page]?.[0] || 'Quantum Gates'}`;
   $('#doc-breadcrumb').innerHTML = `Quantum Gates <span>/</span> ${gatePageInfo[page]?.[0] || 'Introduction'}`;
   renderSidebar();
@@ -2690,7 +2826,7 @@ function loadChapter(index) {
   window.scrollTo({ top: 0, behavior: 'smooth' });
   if (window.innerWidth <= 900) $('#sidebar').classList.remove('open');
 }
-function loadTopic(topicIndex, updateHash = true) { state.activeChapter = 0; state.activeTopic = Math.max(0, Math.min(fundamentalsTopics.length - 1, topicIndex)); const topic = fundamentalsTopics[state.activeTopic]; if (updateHash && window.location.hash !== `#basics-${state.activeTopic + 1}`) window.location.hash = `basics-${state.activeTopic + 1}`; $('#lesson-number').textContent = '01'; $('#lesson-category').textContent = state.activeTopic === 0 ? 'QUANTUM FUNDAMENTALS  /  INTRODUCTION' : `QUANTUM FUNDAMENTALS  /  ${topic.title.toUpperCase()}`; $('#lesson-title').innerHTML = state.activeTopic === 0 ? 'Quantum Fundamentals' : state.activeTopic === 3 ? 'Entanglement<br><i>in connection.</i>' : state.activeTopic === 4 ? 'Measurement<br><i>in observation.</i>' : topic.title; $('#lesson-intro').textContent = topic.intro; $('#lesson-type').textContent = topic.type; $('#next-number').textContent = state.activeTopic < fundamentalsTopics.length - 1 ? `01.${state.activeTopic + 2}` : '02'; $('#next-title').textContent = state.activeTopic < fundamentalsTopics.length - 1 ? fundamentalsTopics[state.activeTopic + 1].title : chapters[1].title; $('#next-time').textContent = state.activeTopic < fundamentalsTopics.length - 1 ? fundamentalsTopics[state.activeTopic + 1].time : chapters[1].time; $('#previous-title').textContent = state.activeTopic > 0 ? fundamentalsTopics[state.activeTopic - 1].title : 'Welcome'; $('#footer-next-title').textContent = state.activeTopic < fundamentalsTopics.length - 1 ? fundamentalsTopics[state.activeTopic + 1].title : chapters[1].title; $('#previous-button').disabled = state.activeTopic === 0; $('#next-button').disabled = false; $('#next-button small').textContent = 'Next'; $('#lesson-body').innerHTML = lessonTemplate(0); $('#mobile-breadcrumb').innerHTML = `Chapter 01 <span>/</span> ${topic.title}`; $('#doc-breadcrumb').innerHTML = `Quantum Fundamentals <span>/</span> ${topic.title}`; renderSidebar(); renderContents(); wireInteractions(0); window.scrollTo({ top: 0, behavior: 'smooth' }); if (window.innerWidth <= 900) $('#sidebar').classList.remove('open'); }
+function loadTopic(topicIndex, updateHash = true) { state.activeChapter = 0; state.activeTopic = Math.max(0, Math.min(fundamentalsTopics.length - 1, topicIndex)); const topic = fundamentalsTopics[state.activeTopic]; if (updateHash && window.location.hash !== `#basics-${state.activeTopic + 1}`) window.location.hash = `basics-${state.activeTopic + 1}`; $('#lesson-number').textContent = '01'; $('#lesson-category').textContent = state.activeTopic === 0 ? 'QUANTUM FUNDAMENTALS  /  INTRODUCTION' : `QUANTUM FUNDAMENTALS  /  ${topic.title.toUpperCase()}`; $('#lesson-title').innerHTML = state.activeTopic === 0 ? 'Quantum Fundamentals' : state.activeTopic === 3 ? 'Entanglement<br><i>in connection.</i>' : state.activeTopic === 4 ? 'Measurement<br><i>in observation.</i>' : topic.title; $('#lesson-intro').textContent = topic.intro; $('#lesson-type').textContent = topic.type; $('#next-number').textContent = state.activeTopic < fundamentalsTopics.length - 1 ? `01.${state.activeTopic + 2}` : '02'; $('#next-title').textContent = state.activeTopic < fundamentalsTopics.length - 1 ? fundamentalsTopics[state.activeTopic + 1].title : chapters[1].title; $('#next-time').textContent = state.activeTopic < fundamentalsTopics.length - 1 ? fundamentalsTopics[state.activeTopic + 1].time : chapters[1].time; $('#previous-title').textContent = state.activeTopic > 0 ? fundamentalsTopics[state.activeTopic - 1].title : 'Welcome'; $('#footer-next-title').textContent = state.activeTopic < fundamentalsTopics.length - 1 ? fundamentalsTopics[state.activeTopic + 1].title : chapters[1].title; $('#previous-button').disabled = state.activeTopic === 0; $('#next-button').disabled = false; $('#next-button small').textContent = 'Next'; $('#lesson-body').innerHTML = lessonTemplate(0); addLessonSupport(`fundamentals-${state.activeTopic}`); $('#mobile-breadcrumb').innerHTML = `Chapter 01 <span>/</span> ${topic.title}`; $('#doc-breadcrumb').innerHTML = `Quantum Fundamentals <span>/</span> ${topic.title}`; renderSidebar(); renderContents(); wireInteractions(0); window.scrollTo({ top: 0, behavior: 'smooth' }); if (window.innerWidth <= 900) $('#sidebar').classList.remove('open'); }
 function loadMathTopic(topicIndex, updateHash = true) {
   if (!Number.isInteger(topicIndex) || topicIndex < 0 || topicIndex >= mathematicsTopics.length) {
     throw new RangeError(`Invalid mathematical topic index: ${topicIndex}`);
@@ -2720,6 +2856,7 @@ function loadMathTopic(topicIndex, updateHash = true) {
     : state.activeMathTopic === 1
       ? vectorsLessonTemplate(topic)
       : documentedMathLessonTemplate(topic);
+  addLessonSupport(`math-${topic.slug}`);
   $('#mobile-breadcrumb').innerHTML = `Chapter 02 <span>/</span> ${topic.title}`;
   $('#doc-breadcrumb').innerHTML = `Mathematical Foundations <span>/</span> ${topic.title}`;
   renderSidebar();
