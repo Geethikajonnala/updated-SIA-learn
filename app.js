@@ -341,12 +341,12 @@ const navigationSections = [
   },
   {
     id: 'teaching-and-interactive-learning',
-    title: 'Teaching and Interactive Learning',
+    title: 'Teaching and Browser Tools',
     topics: siaDocNavigationTopics[5]
   },
   {
     id: 'quantum-machine-learning-and-integration',
-    title: 'Quantum Machine Learning and Integration',
+    title: 'Quantum ML and Integrations',
     topics: siaDocNavigationTopics[6]
   },
   {
@@ -356,7 +356,7 @@ const navigationSections = [
   },
   {
     id: 'interactive-html-examples',
-    title: 'Interactive HTML Examples',
+    title: 'Interactive HTML Gallery',
     topics: siaDocNavigationTopics[8]
   }
 ];
@@ -2536,8 +2536,23 @@ const siaGateExampleDiagrams = {
 function siaDocLessonMarkup(topic) {
   if (topic.title === '3D Models') return sia3DModelsLessonMarkup();
   if (topic.linkIndex) {
-    const links = topic.examples.flatMap((example) => (example.htmlFiles || []).map((file) => `<li><strong>${formatReferenceText(example.title)}</strong> <a class="model-action-link" href="${escapeLessonText(file)}" target="_blank" rel="noopener noreferrer">Open ${escapeLessonText(file.split('/').pop())} -></a></li>`)).join('');
-    return `<section class="qubit-lesson sia-reference-lesson"><div class="qubit-section"><h2>Interactive HTML outputs</h2><p>${formatReferenceText(topic.theory)}</p><ul class="structured-example-links">${links}</ul></div></section>`;
+    const examples = topic.examples.map((example) => {
+      const files = (example.htmlFiles || []).map((file) => `<a class="model-action-link" href="${escapeLessonText(file)}" target="_blank" rel="noopener noreferrer">Open ${escapeLessonText(file.split('/').pop())} ↗</a>`).join(' ');
+      const codeExplanation = example.codeExplanation || example.description || `This code creates the interactive example “${example.title}” and saves its browser page.`;
+      const outputExplanation = example.outputExplanation || (example.output
+        ? 'This is the output recorded for the notebook example. It shows the result or export status produced by the code above.'
+        : 'This cell creates an HTML file rather than printing text. Open the linked file to see and use its interactive result.');
+      return `<section class="qubit-section notebook-example" id="notebook-example-${example.number}">
+        <h3>${formatReferenceText(example.title)}</h3>
+        ${example.description ? `<p class="notebook-example-note">${formatReferenceText(example.description)}</p>` : ''}
+        <h4>Code</h4><pre class="hdqs-code"><code>${escapeLessonText(example.code)}</code></pre>
+        <p class="notebook-explanation"><strong>Code explanation.</strong> ${formatReferenceText(codeExplanation)}</p>
+        <h4>Recorded output</h4>${example.output ? `<pre class="hdqs-output"><code>${escapeLessonText(example.output)}</code></pre>` : '<p>No text output is recorded for this file-generating cell.</p>'}
+        <p class="notebook-explanation"><strong>Output explanation.</strong> ${formatReferenceText(outputExplanation)}</p>
+        ${files ? `<div class="structured-example-links">${files}</div>` : ''}
+      </section>`;
+    }).join('');
+    return `<section class="qubit-lesson sia-reference-lesson"><div class="qubit-section"><h2>Interactive HTML examples</h2><p>${formatReferenceText(topic.theory)}</p>${examples}</div></section>`;
   }
   const partIntros = topic.notebookParts.map((part) => {
     const intro = part.intro.replace(/^## Part [^\n]+\n+/, '');
@@ -2738,7 +2753,7 @@ function loadSiaDocTopic(topicIndex, updateHash = true) {
   $('#next-button small').textContent = 'Next topic';
   $('#lesson-body').innerHTML = siaDocLessonMarkup(topic);
   if (topic.title === 'Simulation Modes') addLessonSupport('simulation-modes');
-  if (topic.title === 'The Browser Playground') addLessonSupport('browser-playground');
+  if (topic.title === 'Browser Circuit Playground') addLessonSupport('browser-playground');
   if (topic.title === '3D Models') initializeInteractive3DModels();
   $('#mobile-breadcrumb').innerHTML = `Chapter ${String(topic.chapter + 1).padStart(2, '0')} <span>/</span> ${topic.title}`;
   $('#doc-breadcrumb').innerHTML = `${navigationSections[topic.sectionIndex + 2].title} <span>/</span> ${topic.title}`;
