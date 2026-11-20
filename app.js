@@ -2546,23 +2546,52 @@ function sia3DModelsLessonMarkup() {
   return `<section class="qubit-lesson sia-reference-lesson structured-3d-lesson">${explorerSection}${exportSection}</section>`;
 }
 
+const siaGateExampleDiagrams = {
+  62: [
+    { src: 'images/x_gate.svg', alt: 'X gate circuit diagram', caption: 'X gate: flips the computational basis state.' },
+    { src: 'images/y_gate.svg', alt: 'Y gate circuit diagram', caption: 'Y gate: flips the basis state and adds a phase.' },
+    { src: 'images/z_gate.svg', alt: 'Z gate circuit diagram', caption: 'Z gate: changes the phase of the |1⟩ component.' },
+    { src: 'images/h_gate.svg', alt: 'Hadamard gate circuit diagram', caption: 'Hadamard gate: creates an equal superposition from |0⟩.' }
+  ],
+  63: [
+    { src: 'images/s_gate.svg', alt: 'S gate circuit diagram', caption: 'S gate: applies a quarter-turn phase rotation.' },
+    { src: 'images/t_gate.svg', alt: 'T gate circuit diagram', caption: 'T gate: applies a π/4 phase rotation.' }
+  ],
+  64: [
+    { src: 'images/rx_gate.svg', alt: 'RX gate circuit diagram', caption: 'RX gate: rotates a qubit around the x-axis.' },
+    { src: 'images/ry_gate.svg', alt: 'RY gate circuit diagram', caption: 'RY gate: rotates a qubit around the y-axis.' },
+    { src: 'images/rz_gate.svg', alt: 'RZ gate circuit diagram', caption: 'RZ gate: rotates a qubit around the z-axis.' }
+  ],
+  66: [
+    { src: 'images/cnot_gate.svg', alt: 'CNOT gate circuit diagram', caption: 'CNOT gate: flips the target when the control is |1⟩.' },
+    { src: 'images/cz_gate.svg', alt: 'CZ gate circuit diagram', caption: 'CZ gate: changes the phase of the |11⟩ state.' }
+  ],
+  68: [
+    { src: 'images/swap_gate.svg', alt: 'SWAP gate circuit diagram', caption: 'SWAP gate: exchanges the states carried by two qubits.' }
+  ]
+};
+
 function siaDocLessonMarkup(topic) {
   if (topic.title === '3D Models') return sia3DModelsLessonMarkup();
   const partIntros = topic.notebookParts.map((part) => {
     const intro = part.intro.replace(/^## Part [^\n]+\n+/, '');
     return `<p>${formatReferenceText(intro)}</p>`;
   }).join('');
-  const examples = topic.examples.map((example) => `<section class="qubit-section notebook-example" id="notebook-example-${example.number}">
+  const examples = topic.examples.map((example) => {
+    const gateDiagrams = (siaGateExampleDiagrams[example.number] || []).map((diagram) => `<figure class="notebook-gate-diagram"><img src="${diagram.src}" alt="${diagram.alt}"><figcaption>${diagram.caption}</figcaption></figure>`).join('');
+    return `<section class="qubit-section notebook-example" id="notebook-example-${example.number}">
     <h3>${formatReferenceText(example.title)}</h3>
     ${example.description ? `<p class="notebook-example-note">${formatReferenceText(example.description)}</p>` : ''}
     ${example.pdfContext ? `<p class="notebook-explanation"><strong>PDF concept.</strong> ${formatReferenceText(example.pdfContext)}</p>` : ''}
     <h4>Sia Script</h4>
+    ${gateDiagrams ? `<div class="notebook-gate-diagrams" aria-label="Quantum gate diagrams">${gateDiagrams}</div>` : ''}
     <pre class="hdqs-code"><code>${escapeLessonText(example.code)}</code></pre>
     ${example.codeExplanation ? `<p class="notebook-explanation"><strong>Code explanation.</strong> ${formatReferenceText(example.codeExplanation)}</p>` : ''}
     ${example.output ? `<h4>Recorded notebook output</h4><pre class="hdqs-output"><code>${escapeLessonText(example.output)}</code></pre>` : ''}
     ${example.assets.map((asset) => `<figure class="notebook-output-figure"><img src="${escapeLessonText(asset)}" alt="Saved notebook output: ${escapeLessonText(example.title)}"><figcaption>Saved notebook output: ${formatReferenceText(example.title)}.</figcaption></figure>`).join('')}
     ${example.outputExplanation ? `<p class="notebook-explanation"><strong>Output explanation.</strong> ${formatReferenceText(example.outputExplanation)}</p>` : ''}
-  </section>`).join('');
+  </section>`;
+  }).join('');
   return `<section class="qubit-lesson sia-reference-lesson">
     <div class="qubit-section"><h2>Concepts and notation</h2><p>${formatReferenceText(topic.theory)}</p>${partIntros}</div>
     <div class="qubit-section"><h2>Documented Sia Script examples</h2>${examples}</div>
@@ -2573,6 +2602,14 @@ let interactive3DModulesPromise;
 function initializeInteractive3DModels() {
   const previews = [...document.querySelectorAll('[data-model-preview]')];
   if (!previews.length) return;
+  if (window.location.protocol === 'file:') {
+    previews.forEach((preview) => {
+      preview.classList.add('model-preview-unavailable');
+      const status = preview.querySelector('[data-model-status]');
+      if (status) status.textContent = 'Interactive 3D previews require a local web server. Run `python -m http.server 8000` in the project folder, then open http://localhost:8000.';
+    });
+    return;
+  }
   if (!interactive3DModulesPromise) {
     interactive3DModulesPromise = Promise.all([
       import('./assets/interactive-3d/vendor/build/three.module.js'),

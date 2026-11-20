@@ -872,6 +872,10 @@ body { background: #fff; }
 .notebook-example h3 { margin: 0 0 10px; font-size: 19px; line-height: 1.4; }
 .notebook-example h4 { margin: 22px 0 7px; font: 600 11px/1.4 var(--mono); letter-spacing: .045em; color: var(--teal-dark); text-transform: uppercase; }
 .notebook-example-note { margin: 0 0 14px; font-family: var(--serif); }
+.notebook-gate-diagrams { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 170px), 1fr)); gap: 12px; margin: 12px 0 16px; }
+.notebook-gate-diagram { min-width: 0; margin: 0; }
+.notebook-gate-diagram img { display: block; width: 100%; height: 112px; object-fit: contain; border: 1px solid var(--line); background: #fff; }
+.notebook-gate-diagram figcaption { margin-top: 6px; color: var(--muted); font: 10px/1.5 var(--sans); }
 .notebook-example > .hdqs-code { margin-top: 0; }
 .notebook-example > .hdqs-output { margin-top: 0; }
 .notebook-explanation { font-size: 13px !important; line-height: 1.7; }
@@ -879,6 +883,161 @@ body { background: #fff; }
 .notebook-output-figure img { display: block; width: auto; max-width: min(100%, 760px); max-height: 620px; object-fit: contain; border: 1px solid var(--line); background: #fff; }
 .notebook-output-figure figcaption { margin-top: 7px; color: var(--muted); font: 10px var(--mono); }
 .lesson-body code { overflow-wrap: anywhere; }
+
+/* Consistent documentation layout for the five individual algorithm lessons. */
+.algorithm-lesson {
+  display: grid;
+  width: 100%;
+  max-width: 900px;
+  gap: 14px;
+}
+.algorithm-lesson > .qubit-section {
+  min-width: 0;
+  margin: 0;
+  padding: 19px 21px;
+  border: 1px solid #dce7f1;
+  border-left: 3px solid #9dcfe2;
+  border-radius: 9px;
+  background: #fff;
+  box-shadow: 0 3px 12px rgba(20, 42, 74, .035);
+}
+.algorithm-lesson > .qubit-section h2 {
+  margin: 0 0 11px;
+  padding: 0;
+  border: 0;
+  color: #15385f;
+  font-size: 19px;
+  line-height: 1.4;
+}
+.algorithm-lesson > .qubit-section h3 {
+  margin: 18px 0 7px;
+  color: var(--teal-dark);
+  font-size: 14px;
+}
+.algorithm-lesson > .qubit-section h2 + h3 {
+  margin-top: 0;
+}
+.algorithm-lesson > .qubit-section p,
+.algorithm-lesson > .qubit-section li {
+  max-width: 100%;
+  font-size: 13px;
+  line-height: 1.75;
+}
+.algorithm-lesson > .qubit-section ol,
+.algorithm-lesson > .qubit-section ul {
+  margin: 10px 0 0;
+  padding-left: 21px;
+}
+.algorithm-lesson > .qubit-section li + li {
+  margin-top: 5px;
+}
+.algorithm-lesson > .qubit-section:has(.circuit-sketch) {
+  border-left-color: var(--teal);
+}
+.algorithm-lesson .circuit-sketch {
+  max-width: 100%;
+  margin: 14px 0 2px;
+  padding: 13px 15px;
+  overflow-x: auto;
+  border: 1px solid #dce9f4;
+  background: #f6faff;
+  color: var(--teal-dark);
+  font-size: 12px;
+  line-height: 1.75;
+}
+.algorithm-lesson > .qubit-section:has(> .hdqs-code) {
+  border-left-color: var(--coral);
+  background: #fcfdff;
+}
+.algorithm-lesson .hdqs-code {
+  margin: 12px 0 0;
+  padding: 15px 17px;
+  border: 1px solid #dce7f1;
+  border-left: 3px solid var(--coral);
+  border-radius: 6px;
+  background: #f6f9fd;
+  color: #183451;
+  font-size: 12px;
+  line-height: 1.7;
+}
+.algorithm-lesson > .qubit-section:has(> .hdqs-output) {
+  border-left-color: var(--teal);
+}
+.algorithm-lesson .hdqs-output {
+  margin: 12px 0 0;
+  padding: 15px 17px;
+  border: 1px solid #274666;
+  border-left: 3px solid var(--teal);
+  border-radius: 6px;
+  font-size: 12px;
+  line-height: 1.7;
+}
+.algorithm-lesson > .key-idea {
+  margin: 0;
+  padding: 17px 20px;
+  border: 1px solid #cfe7ef;
+  border-top: 2px solid var(--teal);
+  border-radius: 8px;
+  background: #f3f9fb;
+}
+.algorithm-lesson > .key-idea .card-label {
+  display: block;
+  margin-bottom: 7px;
+}
+.algorithm-lesson > .key-idea p {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.7;
+}
+@media (max-width: 560px) {
+  .algorithm-lesson { gap: 10px; }
+  .algorithm-lesson > .qubit-section { padding: 15px 16px; }
+  .algorithm-lesson > .qubit-section h2 { font-size: 17px; }
+  .algorithm-lesson .circuit-sketch,
+  .algorithm-lesson .hdqs-code,
+  .algorithm-lesson .hdqs-output { padding: 12px 13px; font-size: 11px; }
+  .algorithm-lesson > .key-idea { padding: 15px 16px; }
+}
+
+/* Compact Phase 1 support blocks within the existing documentation layout. */
+.lesson-body:has(> .lesson-support-card) {
+  border-top: 0;
+  padding-top: 0;
+}
+.lesson-body > .lesson-support-card {
+  display: block;
+  margin: 0;
+  padding: 20px 0 18px;
+  border: 0;
+  border-bottom: 1px solid var(--line);
+}
+.lesson-body > .lesson-support-card h3 {
+  margin: 0 0 7px;
+  line-height: 1.4;
+}
+.lesson-body > .lesson-support-card h3:not(:first-child) {
+  margin-top: 17px;
+}
+.lesson-body > .lesson-support-card ul,
+.lesson-body > .lesson-support-card ol {
+  margin: 7px 0 0;
+  padding-left: 20px;
+}
+.lesson-body > .lesson-support-card li + li {
+  margin-top: 4px;
+}
+.lesson-body > .lesson-support-card p {
+  margin-bottom: 0;
+}
+.lesson-body > .lesson-support-card[aria-label="Step-by-step explanation"] {
+  margin-top: 26px;
+  padding-top: 20px;
+  border-top: 1px solid var(--line);
+  border-bottom: 0;
+}
+.lesson-body > .lesson-support-takeaways {
+  margin-top: 14px;
+}
 .interactive-visualization-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 230px), 1fr));
@@ -943,7 +1102,7 @@ body { background: #fff; }
 .model-preview {
   position: relative;
   width: 100%;
-  height: clamp(190px, 24vw, 270px);
+  height: clamp(320px, 34vw, 420px);
   margin-top: 8px;
   overflow: hidden;
   border: 1px solid var(--line);
@@ -961,6 +1120,8 @@ body { background: #fff; }
   font: 10px/1.5 var(--mono);
   pointer-events: none;
 }
+.model-preview-unavailable { display: flex; height: auto; min-height: 88px; align-items: center; padding: 12px; }
+.model-preview-unavailable .model-preview-status { position: static; inset: auto; padding: 0; background: transparent; }
 .model-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: auto; padding-top: 14px; }
 .model-actions a {
   display: inline-flex;
@@ -980,5 +1141,6 @@ body { background: #fff; }
   .notebook-output-figure img { max-height: 460px; }
   .interactive-visualization-card { padding: 15px; }
   .interactive-model-grid { grid-template-columns: minmax(0, 1fr); }
-  .model-preview { height: 230px; }
+  .model-preview { height: 280px; }
+  .model-preview-unavailable { height: auto; min-height: 88px; }
 }

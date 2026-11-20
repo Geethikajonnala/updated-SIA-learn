@@ -4,13 +4,15 @@ A standalone interactive-book style learning experience for quantum computing. B
 
 ## Run locally
 
-Open `index.html` in a browser, or serve the folder with any static server:
+Serve the project folder with a static HTTP server before opening it:
 
 ```powershell
 python -m http.server 8000
 ```
 
 Then visit `http://localhost:8000`.
+
+Do not open `index.html` directly as a `file://` URL. The interactive 3D previews load JavaScript modules, which browsers block when the page is opened from the filesystem.
 
 ## Structure
 
