@@ -386,6 +386,7 @@ body { background: #fff; }
 .gate-section p { margin-bottom: 11px; }
 .gate-image { width: min(100%, 520px); margin: 18px 0 0; }
 .gate-image img { display: block; width: 100%; height: auto; }
+.gate-detail .gate-image img[src$="swap_gate.svg"] { width: min(100%, 360px); margin-inline: auto; }
 .gate-section .qubit-equation { margin: 11px 0; }
 .gate-use { display: block; margin: 8px 0; color: #71839d; font-size: 10px; line-height: 1.5; }
 .gate-takeaway { color: var(--teal-dark) !important; font-size: 11px !important; }
@@ -720,6 +721,9 @@ body { background: #fff; }
 .basic-circuits-lesson .qubit-section > h2 {
   margin-bottom: 15px;
   font-size: 23px;
+}
+.basic-circuits-lesson > .qubit-section {
+  border-bottom: 0;
 }
 .basic-circuits-lesson .qubit-section > h3 {
   margin: 23px 0 8px;
