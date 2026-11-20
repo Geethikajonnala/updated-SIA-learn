@@ -38,6 +38,13 @@ const siaDocSections = [
   { chapter: 8, title: 'Quantum Machine Learning and Integration', category: 'MACHINE LEARNING AND INTEGRATION', parts: [
     { title: 'Machine Learning with PyTorch', intro: 'Place a Sia quantum layer inside a PyTorch model.', theory: 'The documentation describes quantum layers as torch.nn.Modules with exact or parameter-shift gradients. The examples place them in hybrid models and train them with ordinary PyTorch optimizers.', code: 'import torch\nfrom sia import hdqs\nprint(hdqs.quantum_layer(3, layers=2)(torch.rand(4, 3, dtype=torch.float64)).shape)', output: 'torch.Size([4, 3])', explanation: 'A batch of four three-component inputs produces a tensor with shape (4, 3).' },
     { title: 'Interoperability and Utilities', intro: 'Inspect capabilities, convert circuits, and use optional adapters.', theory: 'The manual documents capability reporting, resource inspection, partial trace, random-state generation, and optional adapters such as Qiskit and Qiskit Aer. Adapter availability depends on the installation and is reported by capabilities().', code: 'from sia import hdqs\nprint(hdqs.capabilities())', output: "{'version': '1.5.7', 'native_modes': ['statevector', 'density_matrix', 'trajectory', 'stabilizer', 'mps'], 'torch': True, 'cuda': False, 'qubit_order': 'q0_msb', 'optional': {'openqasm3': True, 'matplotlib': True, 'scipy': True, 'qiskit': True, 'qiskit_aer': True, 'pennylane': True}, 'native_transforms': ['optimize', 'transform'], 'native_scheduling': ['moments', 'depth', 'schedule'], 'native_primitives': ['Sampler', 'Estimator'], 'aer_adapter_modes': ['matrix_product_state', 'stabilizer', 'statevector', 'density_matrix'], 'default_state_budget_mib': 1024, 'cria_block_limit_mib': 256}", explanation: 'This is the saved notebook capability report; optional integrations reflect that notebook environment.' }
+  ]},
+  { chapter: 8, title: 'Notebook Foundations', category: 'NOTEBOOK FOUNDATIONS', parts: [
+    { title: 'Mathematics and Practice', intro: 'Work through the notebook examples for complex numbers, vectors, matrices, tensor products, and practice tools.', excludeExampleNumbers: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14], notebookPartIds: ['0'] },
+    { title: 'Quantum Mechanics', intro: 'Explore Dirac notation, observables, measurement, uncertainty, time evolution, Stern–Gerlach experiments, and practice.', excludeExampleNumbers: [23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34], notebookPartIds: ['0B'] }
+  ]},
+  { chapter: 8, title: 'Interactive HTML Examples', category: 'INTERACTIVE NOTEBOOK OUTPUTS', parts: [
+    { title: 'HTML Examples', intro: 'Browse the generated interactive HTML pages from the notebook.', theory: 'This page is a shortcut index to interactive outputs. The complete examples stay in their original lessons; use these links to open the generated pages.', exampleNumbers: [19, 21, 35, 37, 38, 39, 40, 41, 42, 43, 44, 45, 186, 197, 198, 208, 210, 221, 222, 223, 224, 230, 231, 232, 233, 234], linkIndex: true }
   ]}
 ];
 const siaDocTopicParts = [
@@ -48,12 +55,15 @@ const siaDocTopicParts = [
 let siaDocTopicIndex = 0;
 const siaDocTopics = siaDocSections.flatMap((section, sectionIndex) => section.parts.map((part) => {
   const topicIndex = siaDocTopicIndex++;
-  const partIds = siaDocTopicParts[topicIndex];
-  let examples = partIds.flatMap((partId) => siaNotebookExamples.filter((example) => example.partId === partId));
+  const partIds = part.notebookPartIds || siaDocTopicParts[topicIndex] || [];
+  let examples = part.exampleNumbers
+    ? siaNotebookExamples.filter((example) => part.exampleNumbers.includes(example.number))
+    : partIds.flatMap((partId) => siaNotebookExamples.filter((example) => example.partId === partId));
   if (topicIndex === 6) examples = examples.filter((example) => ![123, 124].includes(example.number));
   if (topicIndex === 7) examples = examples.filter((example) => [123, 124].includes(example.number));
   if (topicIndex === 10) examples = examples.filter((example) => [139, 140, 141].includes(example.number));
   if (topicIndex === 11) examples = examples.filter((example) => [142, 143].includes(example.number));
+  if (part.excludeExampleNumbers) examples = examples.filter((example) => !part.excludeExampleNumbers.includes(example.number));
   return {
     ...part,
     sectionIndex,
